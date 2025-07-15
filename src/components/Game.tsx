@@ -1,25 +1,15 @@
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { extend, useApplication } from "@pixi/react";
 import { Container, Ticker, Text } from "pixi.js";
 import Background from "../components/Background";
 import Ghost from "../components/Ghost";
-import Character, {
-  CHARACTER_SIZE,
-  CHARACTER_Y_POSITION,
-} from "./Character";
+import Character, { CHARACTER_SIZE } from "./Character";
 import Bullet from "./Bullet";
 import Heart from "./Heart";
 import { useHearts } from "../hooks/useHearts";
 import { useGhostGroup } from "../hooks/useGhostGroup";
-
-// 定義子彈的類型
-interface BulletData {
-  id: number;
-  x: number;
-  y: number;
-  vy: number; // 垂直速度
-}
+import { useBullet } from "../hooks/useBullet";
 
 const ghostPositionList = [
   // 第一排
@@ -45,18 +35,14 @@ extend({
 const Game = () => {
   const { app } = useApplication();
 
-  // 是否結束遊戲
-  // const [isGameOver, setIsGameOver] = useState(false);
-
-  // 血量
+  // 血量 & 是否結束遊戲
   const { hearts, takeDamage, isGameOver } = useHearts();
+
+  // 子彈狀態
+  const { bullets, createBullet, updateBullets } = useBullet(takeDamage);
 
   // 幽靈群
   const { groupX, groupY, groupYRef, bobbing } = useGhostGroup();
-
-  // 子彈狀態
-  const [bullets, setBullets] = useState<BulletData[]>([]);
-  const nextBulletId = useRef(0);
 
   // 角色位置
   const charXRef = useRef((768 - CHARACTER_SIZE) / 2);
@@ -65,22 +51,15 @@ const Game = () => {
     charXRef.current = x;
   }, []);
 
+  // 控制射擊的方法
   const handleGhostShoot = useCallback(
     (x: number, y: number) => {
       if (isGameOver) return; // 遊戲結束後不再射擊
 
-      const newBullet: BulletData = {
-        id: nextBulletId.current++,
-        x: x + groupX,
-        y: y + groupYRef.current,
-        vy: 3,
-      };
-      setBullets((prevBullets) => [...prevBullets, newBullet]);
+      createBullet(x + groupX, y + groupYRef.current, 3);
     },
-    [groupX, isGameOver]
+    [groupX, isGameOver, createBullet, groupYRef]
   );
-
-  
 
   useEffect(() => {
     const tick = (ticker: Ticker) => {
@@ -89,49 +68,7 @@ const Game = () => {
         return;
       }
 
-      setBullets((currentBullets) => {
-        const screenHeight = window.innerHeight;
-        const charRect = {
-          x: charXRef.current,
-          y: CHARACTER_Y_POSITION(screenHeight),
-          width: CHARACTER_SIZE,
-          height: CHARACTER_SIZE,
-        };
-
-        let newBullets = [];
-        let damageTakenThisFrame = false;
-
-        for (const bullet of currentBullets) {
-          const movedBullet = {
-            ...bullet,
-            y: bullet.y + bullet.vy * ticker.deltaTime,
-          };
-
-          // 檢查是否超出邊界
-          if (movedBullet.y >= screenHeight) {
-            continue; // 跳過這顆子彈，它已經出界了
-          }
-
-          const bulletRect = { x: movedBullet.x, y: movedBullet.y, width: 12, height: 24 };
-          if (
-            charRect.x < bulletRect.x + bulletRect.width &&
-            charRect.x + charRect.width > bulletRect.x &&
-            charRect.y < bulletRect.y + bulletRect.height &&
-            charRect.y + charRect.height > bulletRect.y
-          ) {
-            // 發生碰撞！
-            if (!damageTakenThisFrame) {
-              takeDamage(); // 每幀只扣一次血
-              damageTakenThisFrame = true;
-            }
-            // 不將這顆子彈加入 newBullets，達到移除效果
-          } else {
-            newBullets.push(movedBullet); // 將沒有碰撞的子彈加入新陣列
-          }
-        }
-
-        return newBullets;
-      });
+      updateBullets(ticker, charXRef.current);
 
       // 持續上下晃動幽靈群
       bobbing(ticker.deltaTime);
@@ -142,7 +79,7 @@ const Game = () => {
     return () => {
       app.ticker.remove(tick);
     };
-  }, [app, isGameOver]); // 移除 'bullets' 依賴，因為 setBullets 使用函數式更新
+  }, [app, isGameOver, updateBullets, bobbing]);
 
   return (
     <pixiContainer x={0} y={0}>
