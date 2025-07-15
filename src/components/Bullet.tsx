@@ -1,10 +1,9 @@
 import { extend, useApplication } from "@pixi/react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Assets, Sprite } from "pixi.js";
 
-
 extend({
-  Sprite
+  Sprite,
 });
 
 type BulletProps = {
@@ -12,22 +11,33 @@ type BulletProps = {
   y: number;
   vy: number;
   id: number;
-}
-const Bullet: React.FC<BulletProps> = ({ x, y: startY, vy, id }) => {
+  onOutOfBounds: (id: number) => void; // 新增 onOutOfBounds callback
+};
 
+const Bullet: React.FC<BulletProps> = ({ x, y: startY, vy, id, onOutOfBounds }) => {
   const { app } = useApplication();
-  
   const [bulletY, setBulletY] = useState(startY);
 
+  const screenHeight = window.innerHeight;
+
   useEffect(() => {
-    const tick = () => setBulletY(y => y + vy);
+    const tick = () => {
+      const newY = bulletY + vy;
+      setBulletY(newY);
+
+      // 檢查是否超出邊界
+      if (newY > screenHeight) {
+        onOutOfBounds(id);
+      }
+    };
+
     app.ticker.add(tick);
     return () => {
-      app.ticker.remove(tick)
+      app.ticker.remove(tick);
     };
-  }, [app, vy]);
+  }, [app, vy, bulletY, id, onOutOfBounds, screenHeight]);
 
-  const texture = Assets.get("/assets/bullet.png");
+  const texture = Assets.get("/assets/うんち.png");
 
   if (!texture) return null;
 
@@ -36,8 +46,8 @@ const Bullet: React.FC<BulletProps> = ({ x, y: startY, vy, id }) => {
       texture={texture}
       x={x}
       y={bulletY}
-      width={12}
-      height={24}
+      width={30}
+      height={30}
     />
   );
 };
