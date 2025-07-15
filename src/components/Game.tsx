@@ -11,6 +11,7 @@ import Character, {
 import Bullet from "./Bullet";
 import Heart from "./Heart";
 import { useHearts } from "../hooks/useHearts";
+import { useGhostGroup } from "../hooks/useGhostGroup";
 
 // 定義子彈的類型
 interface BulletData {
@@ -50,14 +51,8 @@ const Game = () => {
   // 血量
   const { hearts, takeDamage, isGameOver } = useHearts();
 
-  // 幽靈群 y 軸位置
-  const [groupY, setGroupY] = useState(100);
-  const groupYRef = useRef(groupY);
-  groupYRef.current = groupY;
-  // 幽靈群移動方向
-  const direction = useRef(1);
-  // 幽靈群 x 軸位置
-  const groupX = (768 - 550) / 2;
+  // 幽靈群
+  const { groupX, groupY, groupYRef, bobbing } = useGhostGroup();
 
   // 子彈狀態
   const [bullets, setBullets] = useState<BulletData[]>([]);
@@ -138,13 +133,8 @@ const Game = () => {
         return newBullets;
       });
 
-      // 更新幽靈群位置
-      setGroupY((prevY) => {
-        let next = prevY + direction.current * ticker.deltaTime * 0.3;
-        if (next > 110) direction.current = -1;
-        if (next < 100) direction.current = 1;
-        return next;
-      });
+      // 持續上下晃動幽靈群
+      bobbing(ticker.deltaTime);
     };
 
     app.ticker.add(tick);
