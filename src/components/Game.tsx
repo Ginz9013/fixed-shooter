@@ -94,8 +94,6 @@ const Game = () => {
         return;
       }
 
-      const screenHeight = window.innerHeight;
-
       setBullets((currentBullets) => {
         const screenHeight = window.innerHeight;
         const charRect = {
