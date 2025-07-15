@@ -9,6 +9,8 @@ const assetList = [
   "/assets/マエデーズ15.png",
   "/assets/レンジャー（レッド）.png",
   "/assets/うんち.png",
+  "/assets/赤色のハート.png",
+  "/assets/黄色のハート.png",
 ];
 
 
