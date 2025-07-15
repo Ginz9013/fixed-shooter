@@ -1,10 +1,13 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { extend, useApplication } from "@pixi/react";
-import { Container, Ticker } from "pixi.js";
+import { Container, Ticker, Text } from "pixi.js";
 import Background from "../components/Background";
 import Ghost from "../components/Ghost";
-import Character from "./Character";
+import Character, {
+  CHARACTER_SIZE,
+  CHARACTER_Y_POSITION,
+} from "./Character";
 import Bullet from "./Bullet"; // 引入 Bullet 元件
 
 // 定義子彈的類型
@@ -33,47 +36,97 @@ const ghostPositionList = [
 
 extend({
   Container,
+  Text,
 });
 
 const Game = () => {
   const { app } = useApplication();
 
+  const [isGameOver, setIsGameOver] = useState(false);
   const [groupY, setGroupY] = useState(100);
   const groupYRef = useRef(groupY);
-  groupYRef.current = groupY; // 保持 ref 與 state 同步
+  groupYRef.current = groupY;
 
-  const direction = useRef(1); // 用 ref 存動畫方向
+  const direction = useRef(1);
 
-  // 管理所有子彈的狀態
   const [bullets, setBullets] = useState<BulletData[]>([]);
   const nextBulletId = useRef(0);
 
-  // 計算 group 的 X 偏移量
+  const charXRef = useRef((768 - CHARACTER_SIZE) / 2);
+
   const groupX = (768 - 550) / 2;
 
-  // 處理幽靈射擊事件
+  const handleCharacterPositionChange = useCallback((x: number) => {
+    charXRef.current = x;
+  }, []);
+
   const handleGhostShoot = useCallback(
     (x: number, y: number) => {
+      if (isGameOver) return; // 遊戲結束後不再射擊
+
       const newBullet: BulletData = {
         id: nextBulletId.current++,
-        // 將 group 的偏移量加回去，轉換為絕對座標
         x: x + groupX,
         y: y + groupYRef.current,
-        vy: 5, // 子彈速度
+        vy: 3,
       };
       setBullets((prevBullets) => [...prevBullets, newBullet]);
     },
-    [groupX] // groupX 是常數，所以這個 callback 不會一直重新建立
+    [groupX, isGameOver]
   );
 
-  // 處理子彈超出邊界事件
-  const handleBulletOutOfBounds = useCallback((id: number) => {
-    setBullets((prevBullets) => prevBullets.filter((bullet) => bullet.id !== id));
-  }, []);
+  
 
-  // 幽靈群的持續動畫特效
   useEffect(() => {
     const tick = (ticker: Ticker) => {
+      if (isGameOver) {
+        app.ticker.remove(tick);
+        return;
+      }
+
+      const screenHeight = window.innerHeight;
+
+      setBullets((currentBullets) => {
+        // 1. 更新所有子彈的位置並過濾出界的
+        const movedAndFilteredBullets = currentBullets
+          .map((bullet) => ({
+            ...bullet,
+            y: bullet.y + bullet.vy * ticker.deltaTime,
+          }))
+          .filter((bullet) => bullet.y < screenHeight);
+
+        // 2. 碰撞偵測
+        const charRect = {
+          x: charXRef.current,
+          y: CHARACTER_Y_POSITION(screenHeight),
+          width: CHARACTER_SIZE,
+          height: CHARACTER_SIZE,
+        };
+
+        let collisionDetected = false;
+        for (const bullet of movedAndFilteredBullets) {
+          // 使用已經移動過的子彈位置進行碰撞偵測
+          const bulletRect = { x: bullet.x, y: bullet.y, width: 12, height: 24 };
+          if (
+            charRect.x < bulletRect.x + bulletRect.width &&
+            charRect.x + charRect.width > bulletRect.x &&
+            charRect.y < bulletRect.y + bulletRect.height &&
+            charRect.y + charRect.height > bulletRect.y
+          ) {
+            collisionDetected = true;
+            break;
+          }
+        }
+
+        if (collisionDetected) {
+          setIsGameOver(true);
+          return []; // 清空所有子彈
+        }
+
+        return movedAndFilteredBullets;
+      });
+
+      // 更新幽靈群位置
       setGroupY((prevY) => {
         let next = prevY + direction.current * ticker.deltaTime * 0.3;
         if (next > 110) direction.current = -1;
@@ -87,18 +140,18 @@ const Game = () => {
     return () => {
       app.ticker.remove(tick);
     };
-  }, [app]);
+  }, [app, isGameOver]); // 移除 'bullets' 依賴，因為 setBullets 使用函數式更新
 
   return (
     <pixiContainer x={0} y={0}>
       {/* Ghost Group */}
-      <pixiContainer x={(768 - 550) / 2} y={groupY}>
+      <pixiContainer x={groupX} y={groupY}>
         {ghostPositionList.map((ghost, index) => (
           <Ghost
             key={index}
             x={ghost.x}
             y={ghost.y}
-            onShoot={handleGhostShoot} // 傳遞射擊處理函式
+            onShoot={handleGhostShoot}
           />
         ))}
       </pixiContainer>
@@ -107,15 +160,28 @@ const Game = () => {
       {bullets.map((bullet) => (
         <Bullet
           key={bullet.id}
-          id={bullet.id}
           x={bullet.x}
           y={bullet.y}
-          vy={bullet.vy}
-          onOutOfBounds={handleBulletOutOfBounds} // 傳遞邊界處理函式
         />
       ))}
 
-      <Character />
+      {!isGameOver && (
+        <Character onPositionChange={handleCharacterPositionChange} />
+      )}
+
+      {isGameOver && (
+        <pixiText
+          text="Game Over"
+          x={768 / 2}
+          y={window.innerHeight / 2}
+          anchor={{ x: 0.5, y: 0.5 }}
+          style={{
+            fill: "white",
+            fontSize: 64,
+            fontWeight: "bold",
+          }}
+        />
+      )}
 
       {/* Background */}
       <Background />
