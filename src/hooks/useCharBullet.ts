@@ -1,5 +1,6 @@
 import { useCallback, useRef } from "react";
 import { type Ghost } from "./useGhostGroup";
+import { checkCollision } from "../utils/game";
 import {
   CHARACTER_Y_POSITION,
   CHAR_BULLET_SPEED,
@@ -67,13 +68,10 @@ export const useCharBullet = (destroyGhost: (id: number) => void) => {
             width: GHOST_WIDTH,
             height: GHOST_HEIGHT,
           };
-
-          if (
-            bulletRect.x < ghostRect.x + ghostRect.width &&
-            bulletRect.x + bulletRect.width > ghostRect.x &&
-            bulletRect.y < ghostRect.y + ghostRect.height &&
-            bulletRect.y + bulletRect.height > ghostRect.y
-          ) {
+          
+          const isCollision = checkCollision(bulletRect, ghostRect);
+          
+          if (isCollision) {
             // 發生碰撞
             hitGhost = true;
             ghostsToRemove.push(ghost.id);

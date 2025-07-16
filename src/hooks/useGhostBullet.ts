@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { CHARACTER_SIZE, CHARACTER_Y_POSITION } from "../config/game";
+import { checkCollision } from "../utils/game";
 
 // 定義子彈的類型
 export interface BulletData {
@@ -53,12 +54,9 @@ export const useGhostBullet = (takeDamage: () => void) => {
             width: 12,
             height: 24,
           };
-          if (
-            charRect.x < bulletRect.x + bulletRect.width &&
-            charRect.x + charRect.width > bulletRect.x &&
-            charRect.y < bulletRect.y + bulletRect.height &&
-            charRect.y + charRect.height > bulletRect.y
-          ) {
+
+          const isCollision = checkCollision(charRect, bulletRect);
+          if (isCollision) {
             // 發生碰撞
             if (!damageTakenThisFrame) {
               takeDamage(); // 每幀只扣一次血
