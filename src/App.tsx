@@ -11,6 +11,7 @@ const assetList = [
   "/assets/うんち.png",
   "/assets/赤色のハート.png",
   "/assets/黄色のハート.png",
+  "/assets/びっくりマーク.png",
 ];
 
 
@@ -29,15 +30,13 @@ const App = () => {
 
       {/* Pixi Container */}
       <div ref={divRef} className="border flex justify-center items-center w-[768px] h-full">
-        {
-          isLoading ? (
-            <p>Loading...</p>
-          ) : (
-            <Application resizeTo={divRef}>
-              <Game />
-            </Application> 
-          )
-        }
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : (
+          <Application resizeTo={divRef}>
+            <Game />
+          </Application> 
+        )}
       </div>
     </div>
   )

@@ -7,6 +7,7 @@ import Ghost from "../components/Ghost";
 import Character from "./Character";
 import GhostBullet from "./GhostBullet";
 import Heart from "./Heart";
+import CharBullet from "./CharBullet";
 import { useHearts } from "../hooks/useHearts";
 import { useGhostGroup } from "../hooks/useGhostGroup";
 import { useGhostBullet } from "../hooks/useGhostBullet";
