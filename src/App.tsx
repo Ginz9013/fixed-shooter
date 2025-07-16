@@ -26,7 +26,7 @@ const App = () => {
   }, []);
 
   return (
-    <div className="w-screen h-screen flex justify-center items-center">
+    <div className="w-screen h-screen flex justify-center items-center bg-black">
 
       {/* Pixi Container */}
       <div ref={divRef} className="border flex justify-center items-center w-[768px] h-full">
