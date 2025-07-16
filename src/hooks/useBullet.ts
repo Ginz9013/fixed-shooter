@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { Ticker } from "pixi.js";
-import { CHARACTER_SIZE, CHARACTER_Y_POSITION } from "../components/Character";
+import { CHARACTER_SIZE, CHARACTER_Y_POSITION } from "../config/game";
 
 // 定義子彈的類型
 export interface BulletData {
@@ -30,7 +30,7 @@ export const useBullet = (takeDamage: () => void) => {
         const screenHeight = window.innerHeight;
         const charRect = {
           x: charX,
-          y: CHARACTER_Y_POSITION(screenHeight),
+          y: CHARACTER_Y_POSITION,
           width: CHARACTER_SIZE,
           height: CHARACTER_SIZE,
         };

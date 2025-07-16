@@ -1,15 +1,16 @@
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { extend, useApplication } from "@pixi/react";
 import { Container, Ticker, Text } from "pixi.js";
 import Background from "../components/Background";
 import Ghost from "../components/Ghost";
-import Character, { CHARACTER_SIZE } from "./Character";
+import Character from "./Character";
 import Bullet from "./Bullet";
 import Heart from "./Heart";
 import { useHearts } from "../hooks/useHearts";
 import { useGhostGroup } from "../hooks/useGhostGroup";
 import { useBullet } from "../hooks/useBullet";
+import { useCharacter } from "../hooks/useCharacter";
 
 const ghostPositionList = [
   // 第一排
@@ -44,12 +45,8 @@ const Game = () => {
   // 幽靈群
   const { groupX, groupY, groupYRef, bobbing } = useGhostGroup();
 
-  // 角色位置
-  const charXRef = useRef((768 - CHARACTER_SIZE) / 2);
-
-  const handleCharacterPositionChange = useCallback((x: number) => {
-    charXRef.current = x;
-  }, []);
+  // 角色狀態
+  const { charX, charXRef } = useCharacter();
 
   // 控制射擊的方法
   const handleGhostShoot = useCallback(
@@ -112,7 +109,7 @@ const Game = () => {
       ))}
 
       {!isGameOver && (
-        <Character onPositionChange={handleCharacterPositionChange} />
+        <Character x={charX} />
       )}
 
       {isGameOver && (
