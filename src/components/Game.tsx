@@ -119,8 +119,8 @@ const Game = () => {
         ))}
       </pixiContainer>
 
-      {/* Render all bullets */}
-      {bullets.map((bullet) => (
+      {/* Render all ghost bullets */}
+      {!isGameOver && bullets.map((bullet) => (
         <GhostBullet
           key={bullet.id}
           x={bullet.x}
@@ -133,7 +133,7 @@ const Game = () => {
       )}
 
       {/* Render all character bullets */}
-      {charBullets.current.map((bullet) => (
+      {!isGameOver && charBullets.current.map((bullet) => (
         <CharBullet
           key={bullet.id}
           x={bullet.x}
