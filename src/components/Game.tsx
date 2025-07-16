@@ -16,22 +16,6 @@ import { useCharBullet } from "../hooks/useCharBullet";
 import { SHOOT_INTERVAL_MS } from "../config/game";
 
 
-const ghostPositionList = [
-  // 第一排
-  { x: 0, y: 0 },
-  { x: 100, y: 0 },
-  { x: 200, y: 0 },
-  { x: 300, y: 0 },
-  { x: 400, y: 0 },
-  { x: 500, y: 0 },
-  // 第二排
-  { x: 50, y: 60 },
-  { x: 150, y: 60 },
-  { x: 250, y: 60 },
-  { x: 350, y: 60 },
-  { x: 450, y: 60 },
-];
-
 extend({
   Container,
   Text,
@@ -44,7 +28,7 @@ const Game = () => {
   const { hearts, takeDamage, isGameOver } = useHearts();
 
   // 幽靈群
-  const { groupX, groupY, groupYRef, bobbing } = useGhostGroup();
+  const { ghosts, groupX, groupY, destroyGhost, bobbing } = useGhostGroup();
 
   // 幽靈子彈狀態
   const { bullets, createBullet, updateBullets } = useGhostBullet(takeDamage);
@@ -53,16 +37,16 @@ const Game = () => {
   const { charX } = useCharacter();
 
   // 角色子彈狀態
-  const { charBullets, onCharFire, updateCharBullets } = useCharBullet();
+  const { charBullets, onCharFire, updateCharBullets } = useCharBullet(destroyGhost);
 
   // 控制射擊的方法
   const handleGhostShoot = useCallback(
     (x: number, y: number) => {
       if (isGameOver) return; // 遊戲結束後不再射擊
 
-      createBullet(x + groupX, y + groupYRef.current, 3);
+      createBullet(x + groupX, y + groupY.current, 3);
     },
-    [groupX, isGameOver, createBullet, groupYRef]
+    [groupX, isGameOver, createBullet, groupY]
   );
 
   useEffect(() => {
@@ -85,7 +69,7 @@ const Game = () => {
       }
 
       updateBullets(ticker.deltaTime, charX.current);
-      updateCharBullets(ticker.deltaTime);
+      updateCharBullets(ticker.deltaTime, ghosts.current, groupX, groupY.current);
 
       // 持續上下晃動幽靈群
       bobbing(ticker.deltaTime);
@@ -96,22 +80,22 @@ const Game = () => {
     return () => {
       app.ticker.remove(tick);
     };
-  }, [app, isGameOver, updateBullets, bobbing, updateCharBullets]);
+  }, [app, isGameOver, updateBullets, bobbing, updateCharBullets, ghosts, groupX, groupY]);
 
   return (
     <pixiContainer x={0} y={0}>
       {/* Hearts */}
       <pixiContainer x={30} y={20}>
-        {hearts.map((heart) => (
+        {hearts.current.map((heart) => (
           <Heart key={heart.x} x={heart.x} type={heart.type} />
         ))}
       </pixiContainer>
 
       {/* Ghost Group */}
-      <pixiContainer x={groupX} y={groupY}>
-        {ghostPositionList.map((ghost, index) => (
+      <pixiContainer x={groupX} y={groupY.current}>
+        {ghosts.current.map(ghost => (
           <Ghost
-            key={index}
+            key={ghost.id}
             x={ghost.x}
             y={ghost.y}
             onShoot={handleGhostShoot}

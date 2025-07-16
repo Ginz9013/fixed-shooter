@@ -10,3 +10,7 @@ export const CHAR_BULLET_WIDTH = 40;
 export const CHAR_BULLET_HEIGHT = 100;
 export const SHOOT_INTERVAL_MS = 2000;
 export const CHAR_BULLET_SPEED = 10;
+
+// 幽靈相關
+export const GHOST_WIDTH = 50;
+export const GHOST_HEIGHT = 50;
