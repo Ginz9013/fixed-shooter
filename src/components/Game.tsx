@@ -7,10 +7,13 @@ import Ghost from "../components/Ghost";
 import Character from "./Character";
 import GhostBullet from "./GhostBullet";
 import Heart from "./Heart";
+import CharBullet from "./CharBullet";
 import { useHearts } from "../hooks/useHearts";
 import { useGhostGroup } from "../hooks/useGhostGroup";
 import { useGhostBullet } from "../hooks/useGhostBullet";
 import { useCharacter } from "../hooks/useCharacter";
+import { useCharBullet } from "../hooks/useCharBullet";
+import { SHOOT_INTERVAL_MS } from "../config/game";
 
 
 const ghostPositionList = [
@@ -49,6 +52,9 @@ const Game = () => {
   // 角色狀態
   const { charX } = useCharacter();
 
+  // 角色子彈狀態
+  const { charBullets, onCharFire, updateCharBullets } = useCharBullet();
+
   // 控制射擊的方法
   const handleGhostShoot = useCallback(
     (x: number, y: number) => {
@@ -58,6 +64,14 @@ const Game = () => {
     },
     [groupX, isGameOver, createBullet, groupYRef]
   );
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      onCharFire(charX.current);
+    }, SHOOT_INTERVAL_MS);
+
+    return () => clearInterval(timer);
+  }, [onCharFire]);
 
   useEffect(() => {
     // 用 ticker 滑順處理動畫相關狀態
@@ -71,6 +85,7 @@ const Game = () => {
       }
 
       updateBullets(ticker.deltaTime, charX.current);
+      updateCharBullets(ticker.deltaTime);
 
       // 持續上下晃動幽靈群
       bobbing(ticker.deltaTime);
@@ -81,7 +96,7 @@ const Game = () => {
     return () => {
       app.ticker.remove(tick);
     };
-  }, [app, isGameOver, updateBullets, bobbing]);
+  }, [app, isGameOver, updateBullets, bobbing, updateCharBullets]);
 
   return (
     <pixiContainer x={0} y={0}>
@@ -116,6 +131,15 @@ const Game = () => {
       {!isGameOver && (
         <Character x={charX.current} />
       )}
+
+      {/* Render all character bullets */}
+      {charBullets.current.map((bullet) => (
+        <CharBullet
+          key={bullet.id}
+          x={bullet.x}
+          y={bullet.y}
+        />
+      ))}
 
       {isGameOver && (
         <pixiText
