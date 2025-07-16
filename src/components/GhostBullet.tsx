@@ -12,7 +12,7 @@ type BulletProps = {
   y: number;
 };
 
-const Bullet: React.FC<BulletProps> = ({ x, y }) => {
+const GhostBullet: React.FC<BulletProps> = ({ x, y }) => {
   const texture = Assets.get("/assets/うんち.png");
 
   if (!texture) return null;
@@ -27,4 +27,4 @@ const Bullet: React.FC<BulletProps> = ({ x, y }) => {
     />
   );
 };
-export default Bullet;
+export default GhostBullet;

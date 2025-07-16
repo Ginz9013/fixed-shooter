@@ -10,7 +10,7 @@ export interface BulletData {
   vy: number; // 垂直速度
 }
 
-export const useBullet = (takeDamage: () => void) => {
+export const useGhostBullet = (takeDamage: () => void) => {
   const [bullets, setBullets] = useState<BulletData[]>([]);
   const nextBulletId = useRef(0);
 

@@ -5,11 +5,11 @@ import { Container, Ticker, Text } from "pixi.js";
 import Background from "../components/Background";
 import Ghost from "../components/Ghost";
 import Character from "./Character";
-import Bullet from "./Bullet";
+import GhostBullet from "./GhostBullet";
 import Heart from "./Heart";
 import { useHearts } from "../hooks/useHearts";
 import { useGhostGroup } from "../hooks/useGhostGroup";
-import { useBullet } from "../hooks/useBullet";
+import { useGhostBullet } from "../hooks/useGhostBullet";
 import { useCharacter } from "../hooks/useCharacter";
 
 const ghostPositionList = [
@@ -40,7 +40,7 @@ const Game = () => {
   const { hearts, takeDamage, isGameOver } = useHearts();
 
   // 子彈狀態
-  const { bullets, createBullet, updateBullets } = useBullet(takeDamage);
+  const { bullets, createBullet, updateBullets } = useGhostBullet(takeDamage);
 
   // 幽靈群
   const { groupX, groupY, groupYRef, bobbing } = useGhostGroup();
@@ -101,7 +101,7 @@ const Game = () => {
 
       {/* Render all bullets */}
       {bullets.map((bullet) => (
-        <Bullet
+        <GhostBullet
           key={bullet.id}
           x={bullet.x}
           y={bullet.y}
