@@ -28,7 +28,7 @@ const Game = () => {
   const { hearts, takeDamage, isGameOver } = useHearts();
 
   // 幽靈群
-  const { ghosts, groupX, groupY, destroyGhost, bobbing } = useGhostGroup();
+  const { ghosts, groupX, groupY, destroyGhost, bobbing, isGameCompleted } = useGhostGroup();
 
   // 幽靈子彈狀態
   const { bullets, createBullet, updateBullets } = useGhostBullet(takeDamage);
@@ -104,7 +104,7 @@ const Game = () => {
       </pixiContainer>
 
       {/* Render all ghost bullets */}
-      {!isGameOver && bullets.map((bullet) => (
+      {!isGameCompleted && !isGameOver && bullets.map((bullet) => (
         <GhostBullet
           key={bullet.id}
           x={bullet.x}
@@ -117,7 +117,7 @@ const Game = () => {
       )}
 
       {/* Render all character bullets */}
-      {!isGameOver && charBullets.current.map((bullet) => (
+      {!isGameCompleted && !isGameOver && charBullets.current.map((bullet) => (
         <CharBullet
           key={bullet.id}
           x={bullet.x}
@@ -125,9 +125,9 @@ const Game = () => {
         />
       ))}
 
-      {isGameOver && (
+      {(isGameCompleted || isGameOver) && (
         <pixiText
-          text="Game Over"
+          text={ isGameCompleted ? "You Win" : "Game Over"}
           x={768 / 2}
           y={window.innerHeight / 2}
           anchor={{ x: 0.5, y: 0.5 }}

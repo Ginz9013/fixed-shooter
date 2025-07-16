@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 
 // 血量型態
 type HeartType = "heart" | "shield";

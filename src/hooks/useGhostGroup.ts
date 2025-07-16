@@ -23,6 +23,10 @@ export interface Ghost {
 }
 
 export const useGhostGroup = () => {
+
+  // 是否通關遊戲
+  const isGameCompleted = useRef<boolean>(false);
+
   // 幽靈狀態
   const ghosts = useRef<Ghost[]>(initGhosts);
   
@@ -35,6 +39,8 @@ export const useGhostGroup = () => {
 
   const destroyGhost = useCallback((id: number) => {
     ghosts.current = ghosts.current.filter(ghost => ghost.id !== id);
+    // 更新是否通關遊戲的狀態
+    isGameCompleted.current = ghosts.current.length <= 0;
   }, []);
 
   // 角色持續晃動
@@ -51,5 +57,6 @@ export const useGhostGroup = () => {
     groupY,
     destroyGhost,
     bobbing,
+    isGameCompleted: isGameCompleted.current,
   };
 };
