@@ -7,11 +7,11 @@ import Ghost from "../components/Ghost";
 import Character from "./Character";
 import GhostBullet from "./GhostBullet";
 import Heart from "./Heart";
-import CharBullet from "./CharBullet";
 import { useHearts } from "../hooks/useHearts";
 import { useGhostGroup } from "../hooks/useGhostGroup";
 import { useGhostBullet } from "../hooks/useGhostBullet";
 import { useCharacter } from "../hooks/useCharacter";
+
 
 const ghostPositionList = [
   // 第一排
@@ -40,14 +40,14 @@ const Game = () => {
   // 血量 & 是否結束遊戲
   const { hearts, takeDamage, isGameOver } = useHearts();
 
-  // 子彈狀態
-  const { bullets, createBullet, updateBullets } = useGhostBullet(takeDamage);
-
   // 幽靈群
   const { groupX, groupY, groupYRef, bobbing } = useGhostGroup();
 
+  // 幽靈子彈狀態
+  const { bullets, createBullet, updateBullets } = useGhostBullet(takeDamage);
+
   // 角色狀態
-  const { charX, charXRef } = useCharacter();
+  const { charX } = useCharacter();
 
   // 控制射擊的方法
   const handleGhostShoot = useCallback(
@@ -60,13 +60,17 @@ const Game = () => {
   );
 
   useEffect(() => {
+    // 用 ticker 滑順處理動畫相關狀態
+    // 1. 幽靈的晃動
+    // 2. 幽靈子彈移動
+    // 3. 幽靈子彈的碰撞
     const tick = (ticker: Ticker) => {
       if (isGameOver) {
         app.ticker.remove(tick);
         return;
       }
 
-      updateBullets(ticker.deltaTime, charXRef.current);
+      updateBullets(ticker.deltaTime, charX.current);
 
       // 持續上下晃動幽靈群
       bobbing(ticker.deltaTime);
@@ -110,7 +114,7 @@ const Game = () => {
       ))}
 
       {!isGameOver && (
-        <Character x={charX} />
+        <Character x={charX.current} />
       )}
 
       {isGameOver && (

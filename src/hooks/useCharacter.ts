@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useApplication } from "@pixi/react";
 import {
   CHARACTER_SIZE,
@@ -12,14 +12,8 @@ import {
 export const useCharacter = () => {
   const { app } = useApplication();
 
-  // 角色 X 軸位置 (State)
-  const [charX, setCharX] = useState<number>((768 - CHARACTER_SIZE) / 2);
-  
-  // 角色 X 軸位置 (Ref) - 用於給其他 ticker 取得最新位置，避免 re-render
-  const charXRef = useRef(charX);
-  useEffect(() => {
-    charXRef.current = charX;
-  }, [charX]);
+  // 角色 X 軸位置
+  const charX = useRef<number>((768 - CHARACTER_SIZE) / 2);
 
   // 移動方向
   const moveDir = useRef<0 | -1 | 1>(0); // -1=左, 1=右, 0=不動
@@ -55,9 +49,9 @@ export const useCharacter = () => {
       if (moveDir.current !== 0) {
         const nextX = Math.max(
           LEFT_BOUND,
-          Math.min(RIGHT_BOUND, charX + MOVE_SPEED * moveDir.current)
+          Math.min(RIGHT_BOUND, charX.current + MOVE_SPEED * moveDir.current)
         );
-        setCharX(nextX);
+        charX.current = nextX;
       }
     };
     app.ticker.add(tick);
@@ -66,5 +60,5 @@ export const useCharacter = () => {
     };
   }, [app, charX]);
 
-  return { charX, charXRef, CHARACTER_SIZE };
+  return { charX };
 };
