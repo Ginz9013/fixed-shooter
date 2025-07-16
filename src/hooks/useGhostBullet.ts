@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback } from "react";
-import { Ticker } from "pixi.js";
 import { CHARACTER_SIZE, CHARACTER_Y_POSITION } from "../config/game";
 
 // 定義子彈的類型
@@ -25,7 +24,7 @@ export const useGhostBullet = (takeDamage: () => void) => {
   }, []);
 
   const updateBullets = useCallback(
-    (ticker: Ticker, charX: number) => {
+    (deltaTime: number, charX: number) => {
       setBullets((currentBullets) => {
         const screenHeight = window.innerHeight;
         const charRect = {
@@ -40,7 +39,7 @@ export const useGhostBullet = (takeDamage: () => void) => {
         const newBullets = currentBullets.reduce<BulletData[]>((acc, bullet) => {
           const movedBullet = {
             ...bullet,
-            y: bullet.y + bullet.vy * ticker.deltaTime,
+            y: bullet.y + bullet.vy * deltaTime,
           };
 
           // 檢查是否超出邊界

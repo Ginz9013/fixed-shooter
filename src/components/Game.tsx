@@ -66,7 +66,7 @@ const Game = () => {
         return;
       }
 
-      updateBullets(ticker, charXRef.current);
+      updateBullets(ticker.deltaTime, charXRef.current);
 
       // 持續上下晃動幽靈群
       bobbing(ticker.deltaTime);
