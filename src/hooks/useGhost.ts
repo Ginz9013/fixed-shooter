@@ -34,26 +34,16 @@ export const useGhost = () => {
     ghostRefs.current.set(id, ghost);
   }, []);
 
-  const handleGhostKilled = useCallback((id: number) => {
-    ghostRefs.current.delete(id);
-    setGhosts(prev => prev.filter(ghost => ghost.id !== id));
+  const handleGhostBatchDelete = useCallback((ids: number[]) => {
+    setGhosts(prev => prev.filter(ghost => !ids.includes(ghost.id)));
+    ids.forEach(id => ghostRefs.current.delete(id));
   }, []);
 
-  // 目前用不到
-  const spawnGhost = useCallback((x: number, y: number) => {
-    const newGhost: GhostData = {
-      id: Date.now(),
-      x,
-      y,
-    };
-    setGhosts(prev => [...prev, newGhost]);
-  }, []);
 
   return {
     ghosts,
     ghostRefs,
     handleGhostMount,
-    handleGhostKilled,
-    spawnGhost,
+    handleGhostBatchDelete,
   };
 }

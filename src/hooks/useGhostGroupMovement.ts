@@ -24,9 +24,6 @@ export const useGhostGroupMovement = () => {
   useEffect(() => {
     if(!ghostGroupRef.current) return;
 
-    ghostGroupRef.current.x = (768 - 550) / 2;
-    ghostGroupRef.current.y = 100;
-
     const tick = (ticker: Ticker) => bobbing(ticker.deltaTime);
     app.ticker.add(tick);
 

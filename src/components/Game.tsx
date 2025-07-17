@@ -5,13 +5,15 @@ import Background from "../components/Background";
 import { useGhost } from "../hooks/useGhost";
 import { useGhostGroupMovement } from "../hooks/useGhostGroupMovement";
 import { useCharacter } from "../hooks/useCharacter";
+import { useCharBullet } from "../hooks/useCharBullet";
 
 
 import Ghost from "../components/Ghost";
 import Character from "./Character";
+import CharBullet from "./CharBullet";
+import { GHOST_GROUP_INIT_X, GHOST_GROUP_INIT_Y } from "../config/game";
 // import GhostBullet from "./GhostBullet";
 // import Heart from "./Heart";
-// import CharBullet from "./CharBullet";
 // import { useHearts } from "../hooks/useHearts";
 // import { useGhostBullet } from "../hooks/useGhostBullet";
 // import { useCharacter } from "../hooks/useCharacter";
@@ -30,7 +32,7 @@ const Game = () => {
   // const { hearts, takeDamage, isGameOver } = useHearts();
 
   // 幽靈群
-  const { ghosts, handleGhostMount } = useGhost();
+  const { ghosts, ghostRefs, handleGhostMount, handleGhostBatchDelete } = useGhost();
   // 幽靈群組
   const { ghostGroupRef } = useGhostGroupMovement();
 
@@ -41,7 +43,7 @@ const Game = () => {
   const { charRef } = useCharacter();
 
   // 角色子彈狀態
-  // const { charBullets, onCharFire, updateCharBullets } = useCharBullet(destroyGhost);
+  const { charBullets, handleCharBulletMount, onCharFire } = useCharBullet({ charRef, ghostRefs, handleGhostBatchDelete });
 
   // 控制射擊的方法
   // const handleGhostShoot = useCallback(
@@ -94,7 +96,11 @@ const Game = () => {
       </pixiContainer> */}
 
       {/* 幽靈 */}
-      <pixiContainer ref={ghostGroupRef}>
+      <pixiContainer
+        ref={ghostGroupRef}
+        x={GHOST_GROUP_INIT_X}
+        y={GHOST_GROUP_INIT_Y}
+      >
         {ghosts.map(ghost => (
           <Ghost
             key={ghost.id}
@@ -116,19 +122,22 @@ const Game = () => {
         />
       ))} */}
 
-      <Character ref={charRef} />
+      <Character ref={charRef} onFire={onCharFire} />
       {/* {!isGameOver && (
         <Character x={charX.current} />
       )} */}
 
-      {/* Render all character bullets */}
-      {/* {!isGameCompleted && !isGameOver && charBullets.current.map((bullet) => (
+      {/* 角色子彈 */}
+      {/* {!isGameCompleted && !isGameOver && charBullets.current.map((bullet) => ( */}
+      {charBullets.map((bullet) => (
         <CharBullet
+          id={bullet.id}
           key={bullet.id}
           x={bullet.x}
           y={bullet.y}
+          onMount={handleCharBulletMount}
         />
-      ))} */}
+      ))}
 
       {/* {(isGameCompleted || isGameOver) && (
         <pixiText

@@ -18,7 +18,7 @@ type GhostProps = {
 };
 
 const Ghost: React.FC<GhostProps> = ({ id, x, y, onShoot, onMount }) => {
-  
+
   const { app } = useApplication();
   const texture = Assets.get("/assets/マエデーズ15.png");
 
