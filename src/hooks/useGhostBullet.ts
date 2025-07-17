@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback, type RefObject } from "react";
-import { CHARACTER_SIZE, CHARACTER_Y_POSITION, GHOST_BULLET_SPEED } from "../config/game";
+import { useState, useRef, useCallback } from "react";
+import { GHOST_BULLET_SPEED } from "../config/game";
 import { checkCollision } from "../utils/game";
 import type { Sprite } from "pixi.js";
 

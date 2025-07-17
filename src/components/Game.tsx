@@ -1,7 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { extend, useApplication } from "@pixi/react";
 import { Container, Text, Ticker } from "pixi.js";
+
 import Background from "../components/Background";
+import Ghost from "../components/Ghost";
+import Character from "./Character";
+import CharBullet from "./CharBullet";
+import Heart from "./Heart";
+import GhostBullet from "./GhostBullet";
+
 import { useGhost } from "../hooks/useGhost";
 import { useGhostGroupMovement } from "../hooks/useGhostGroupMovement";
 import { useCharacter } from "../hooks/useCharacter";
@@ -9,19 +16,15 @@ import { useCharBullet } from "../hooks/useCharBullet";
 import { useHearts } from "../hooks/useHearts";
 import { useGhostBullet } from "../hooks/useGhostBullet";
 
-
-import Ghost from "../components/Ghost";
-import Character from "./Character";
-import CharBullet from "./CharBullet";
-import Heart from "./Heart";
-import GhostBullet from "./GhostBullet";
-import { GHOST_GROUP_INIT_X, GHOST_GROUP_INIT_Y, LEFT_BOUND, MOVE_SPEED, RIGHT_BOUND, SHOOT_INTERVAL_MS, SHOOTING_PROBABILITY } from "../config/game";
-
-
-
-// import { useCharacter } from "../hooks/useCharacter";
-// import { useCharBullet } from "../hooks/useCharBullet";
-// import { SHOOT_INTERVAL_MS } from "../config/game";
+import {
+  GHOST_GROUP_INIT_X,
+  GHOST_GROUP_INIT_Y,
+  LEFT_BOUND,
+  MOVE_SPEED,
+  RIGHT_BOUND,
+  SHOOT_INTERVAL_MS,
+  SHOOTING_PROBABILITY
+} from "../config/game";
 
 
 extend({
@@ -48,7 +51,7 @@ const Game = () => {
   const { ghostBullets, handleGhostBulletMount, clearGhostBullets, onGhostFire, updateGhostBullets } = useGhostBullet();
 
   // 遊戲結束
-  const isGameOver = useMemo(() => hearts.current.length <= 0, [hearts]);
+  const isGameOver = useMemo(() => hearts.length <= 0, [hearts]);
   const isGameCompleted = useMemo(() => ghosts.length <= 0, [ghosts]);
 
 
@@ -113,7 +116,7 @@ const Game = () => {
     <pixiContainer x={0} y={0}>
       {/* 愛心 */}
       <pixiContainer x={30} y={20}>
-        {hearts.current.map((heart) => (
+        {hearts.map((heart) => (
           <Heart key={heart.x} x={heart.x} type={heart.type} />
         ))}
       </pixiContainer>

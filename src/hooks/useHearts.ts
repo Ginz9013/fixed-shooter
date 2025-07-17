@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useState } from "react";
 
 // 血量型態
 type HeartType = "heart" | "shield";
@@ -18,20 +18,12 @@ const defaultHearts: HeartInfo[] = [
 
 export const useHearts = () => {
   // 血量
-  const hearts = useRef<HeartInfo[]>(defaultHearts);
-  // 使用 useRef 來儲存 isGameOver 的最新狀態
-  const isGameOverRef = useRef(hearts.current.length <= 0);
+  const [hearts, setHearts] = useState<HeartInfo[]>(defaultHearts);
 
-  const takeDamage = () => {
-    const newHearts = hearts.current.length > 0 ? hearts.current.slice(0, -1) : hearts.current;
-    isGameOverRef.current =  newHearts.length <= 0;
-    hearts.current = newHearts;
-  }
+  const takeDamage = () => setHearts(prev => prev.length > 0 ? prev.slice(0, -1) : prev);
 
-  // 回傳 isGameOverRef 的 current 值
   return {
     hearts,
-    isGameOver: isGameOverRef.current,
     takeDamage,
   };
 };
