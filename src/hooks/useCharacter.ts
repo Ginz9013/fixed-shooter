@@ -1,19 +1,15 @@
 
 import { useRef, useEffect } from "react";
 import { useApplication } from "@pixi/react";
-import {
-  CHARACTER_SIZE,
-  LEFT_BOUND,
-  RIGHT_BOUND,
-  MOVE_SPEED
-} from "../config/game";
+import { LEFT_BOUND, RIGHT_BOUND, MOVE_SPEED } from "../config/game";
+import type { Sprite } from "pixi.js";
 
 
 export const useCharacter = () => {
   const { app } = useApplication();
 
   // 角色 X 軸位置
-  const charX = useRef<number>((768 - CHARACTER_SIZE) / 2);
+  const charRef = useRef<Sprite>(null);
 
   // 移動方向
   const moveDir = useRef<0 | -1 | 1>(0); // -1=左, 1=右, 0=不動
@@ -46,19 +42,19 @@ export const useCharacter = () => {
   // Ticker - 更新角色位置
   useEffect(() => {
     const tick = () => {
-      if (moveDir.current !== 0) {
+      if (charRef.current && moveDir.current !== 0) {
         const nextX = Math.max(
           LEFT_BOUND,
-          Math.min(RIGHT_BOUND, charX.current + MOVE_SPEED * moveDir.current)
+          Math.min(RIGHT_BOUND, charRef.current.x + MOVE_SPEED * moveDir.current)
         );
-        charX.current = nextX;
+        charRef.current.x = nextX;
       }
     };
     app.ticker.add(tick);
     return () => {
       app.ticker.remove(tick);
     };
-  }, [app, charX]);
+  }, [app, charRef]);
 
-  return { charX };
+  return { charRef };
 };

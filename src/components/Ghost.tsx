@@ -18,8 +18,11 @@ type GhostProps = {
 };
 
 const Ghost: React.FC<GhostProps> = ({ id, x, y, onShoot, onMount }) => {
+  
   const { app } = useApplication();
   const texture = Assets.get("/assets/マエデーズ15.png");
+
+  // Ref 實體
   const ghostRef = useRef<Sprite>(null);
 
   // 元件初始化綁定時，把元件實體註冊到列表中
