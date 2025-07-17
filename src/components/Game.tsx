@@ -1,4 +1,4 @@
-
+import { useEffect } from "react";
 import { extend, useApplication } from "@pixi/react";
 import { Container, Text, Ticker } from "pixi.js";
 import Background from "../components/Background";
@@ -6,17 +6,19 @@ import { useGhost } from "../hooks/useGhost";
 import { useGhostGroupMovement } from "../hooks/useGhostGroupMovement";
 import { useCharacter } from "../hooks/useCharacter";
 import { useCharBullet } from "../hooks/useCharBullet";
+import { useHearts } from "../hooks/useHearts";
+import { useGhostBullet } from "../hooks/useGhostBullet";
 
 
 import Ghost from "../components/Ghost";
 import Character from "./Character";
 import CharBullet from "./CharBullet";
-import { GHOST_GROUP_INIT_X, GHOST_GROUP_INIT_Y, LEFT_BOUND, MOVE_SPEED, RIGHT_BOUND, SHOOT_INTERVAL_MS } from "../config/game";
-import { useEffect } from "react";
-// import GhostBullet from "./GhostBullet";
-// import Heart from "./Heart";
-// import { useHearts } from "../hooks/useHearts";
-// import { useGhostBullet } from "../hooks/useGhostBullet";
+import Heart from "./Heart";
+import GhostBullet from "./GhostBullet";
+import { GHOST_GROUP_INIT_X, GHOST_GROUP_INIT_Y, LEFT_BOUND, MOVE_SPEED, RIGHT_BOUND, SHOOT_INTERVAL_MS, SHOOTING_PROBABILITY } from "../config/game";
+
+
+
 // import { useCharacter } from "../hooks/useCharacter";
 // import { useCharBullet } from "../hooks/useCharBullet";
 // import { SHOOT_INTERVAL_MS } from "../config/game";
@@ -31,7 +33,7 @@ const Game = () => {
   const { app } = useApplication();
 
   // 血量 & 是否結束遊戲
-  // const { hearts, takeDamage, isGameOver } = useHearts();
+  const { hearts, takeDamage, isGameOver } = useHearts();
 
   // 角色
   const { charRef, moveDir } = useCharacter();
@@ -42,9 +44,8 @@ const Game = () => {
   const { ghosts, ghostRefs, handleGhostMount, handleGhostBatchDelete } = useGhost();
   // 幽靈群組
   const { ghostGroupRef, bobbing } = useGhostGroupMovement();
-
   // 幽靈子彈狀態
-  // const { bullets, createBullet, updateBullets } = useGhostBullet(takeDamage);
+  const { ghostBullets, handleGhostBulletMount, onGhostFire } = useGhostBullet();
 
 
 
@@ -63,16 +64,26 @@ const Game = () => {
           Math.min(RIGHT_BOUND, charRef.current.x + MOVE_SPEED * moveDir.current)
         );
         charRef.current.x = nextX;
-      }
+      };
+
+      // 更新角色子彈
+      updateCharBullets(ticker.deltaTime, ghostRefs, handleGhostBatchDelete);
 
       
       // 控制幽靈群組位置 & 上下漂浮
       if(!ghostGroupRef.current) return;
       bobbing(ticker.deltaTime);
 
-
-      // 更新角色子彈
-      updateCharBullets(ticker.deltaTime, ghostRefs, handleGhostBatchDelete);
+      // 幽靈根據機率發射子彈
+      ghostRefs.current.forEach((ghost) => {
+        if (Math.random() < SHOOTING_PROBABILITY) {
+          // 子彈初始位置
+          // 幽靈的中心點位置 + 微調修正
+          if (isGameOver) return; // 遊戲結束後不再射擊
+          onGhostFire(ghost);
+        }
+      })
+      
     };
 
     app.ticker.add(gameLoop);
@@ -126,12 +137,12 @@ const Game = () => {
 
   return (
     <pixiContainer x={0} y={0}>
-      {/* Hearts */}
-      {/* <pixiContainer x={30} y={20}>
+      {/* 愛心 */}
+      <pixiContainer x={30} y={20}>
         {hearts.current.map((heart) => (
           <Heart key={heart.x} x={heart.x} type={heart.type} />
         ))}
-      </pixiContainer> */}
+      </pixiContainer>
 
       {/* 幽靈 */}
       <pixiContainer
@@ -151,14 +162,16 @@ const Game = () => {
         ))}
       </pixiContainer>
 
-      {/* Render all ghost bullets */}
-      {/* {!isGameCompleted && !isGameOver && bullets.map((bullet) => (
+      {/* 幽靈子彈 */}
+      {ghostBullets.map((bullet) => (
         <GhostBullet
           key={bullet.id}
+          id={bullet.id}
           x={bullet.x}
           y={bullet.y}
+          onMount={handleGhostBulletMount}
         />
-      ))} */}
+      ))}
 
       <Character ref={charRef} />
       {/* {!isGameOver && (

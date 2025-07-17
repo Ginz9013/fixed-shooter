@@ -1,25 +1,21 @@
-import { extend, useApplication } from "@pixi/react";
-import { Assets, Sprite } from "pixi.js";
 import { useEffect, useRef } from "react";
+import { extend } from "@pixi/react";
+import { Assets, Sprite } from "pixi.js";
+import { GHOST_HEIGHT, GHOST_WIDTH } from "../config/game";
 
 extend({
   Sprite,
 });
-
-// 射擊機率 (每幀)
-const SHOOTING_PROBABILITY = 0.001; // 調整這個值來改變射擊頻率
 
 type GhostProps = {
   id: number;
   x: number;
   y: number;
   onMount: (id: number, ghost: Sprite) => void;
-  onShoot?: (x: number, y: number) => void; // 新增 onShoot callback
 };
 
-const Ghost: React.FC<GhostProps> = ({ id, x, y, onShoot, onMount }) => {
-
-  const { app } = useApplication();
+const Ghost: React.FC<GhostProps> = ({ id, x, y, onMount }) => {
+  // 貼圖
   const texture = Assets.get("/assets/マエデーズ15.png");
 
   // Ref 實體
@@ -31,22 +27,6 @@ const Ghost: React.FC<GhostProps> = ({ id, x, y, onShoot, onMount }) => {
     onMount(id, ghostRef.current);
   }, []);
 
-  // 射擊邏輯
-  // useEffect(() => {
-  //   const tick = () => {
-  //     if (Math.random() < SHOOTING_PROBABILITY) {
-  //       // 子彈初始位置
-  //       // 幽靈的中心點位置 + 微調修正
-  //       // onShoot(x + 10, y + 50);
-  //     }
-  //   };
-  //   app.ticker.add(tick);
-  //   return () => {
-  //     app.ticker.remove(tick);
-  //   };
-  // }, [app, x, y, onShoot]);
-
-  // const yell = () => console.log("Ghost~~~~");
 
   if (!texture) return null;
 
@@ -56,12 +36,8 @@ const Ghost: React.FC<GhostProps> = ({ id, x, y, onShoot, onMount }) => {
       texture={texture}
       x={x}
       y={y}
-      width={50}
-      height={50}
-      // 開啟互動
-      // interactive={true}
-      // onClick={yell}
-      // onMouseOver={yell}
+      width={GHOST_WIDTH}
+      height={GHOST_HEIGHT}
     />
   );
 };
