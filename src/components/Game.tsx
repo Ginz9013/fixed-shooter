@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { extend, useApplication } from "@pixi/react";
 import { Container, Text, Ticker } from "pixi.js";
 
@@ -50,11 +50,26 @@ const Game = () => {
   // 幽靈子彈狀態
   const { ghostBullets, handleGhostBulletMount, clearGhostBullets, onGhostFire, updateGhostBullets } = useGhostBullet();
 
+  // 計時
+  const [timing, setTiming] = useState<number>(60);
+
+  // 分數
+  const [score, setScore] = useState<number>(0);
+
   // 遊戲結束
-  const isGameOver = useMemo(() => hearts.length <= 0, [hearts]);
+  const isGameOver = useMemo(() => hearts.length <= 0 || timing <= 0, [hearts, timing]);
   const isGameCompleted = useMemo(() => ghosts.length <= 0, [ghosts]);
 
+  // 加分方法
+  const addScore = (score: number) => setScore(prev => prev + score); 
 
+  // 倒數計時
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTiming(prev => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Game Loop
   useEffect(() => {
@@ -76,7 +91,7 @@ const Game = () => {
       };
 
       // 更新角色子彈
-      updateCharBullets(ticker.deltaTime, ghostRefs, handleGhostBatchDelete);
+      updateCharBullets(ticker.deltaTime, ghostRefs, handleGhostBatchDelete, addScore);
 
       
       // 控制幽靈群組位置 & 上下漂浮
@@ -106,6 +121,7 @@ const Game = () => {
     };
   }, [onCharFire]);
 
+  // 結束遊戲 - 清空子彈
   useEffect(() => {
     clearGhostBullets();
     clearCharBullets();
@@ -120,6 +136,36 @@ const Game = () => {
           <Heart key={heart.x} x={heart.x} type={heart.type} />
         ))}
       </pixiContainer>
+
+      {/* 分數 */}
+      {!isGameCompleted && !isGameOver && (
+        <pixiText
+          text={score}
+          x={768 / 2 + 50}
+          y={50}
+          anchor={{ x: 0.5, y: 0.5 }}
+          style={{
+            fill: "white",
+            fontSize: 48,
+            fontWeight: "bold",
+          }}
+        />
+      )}
+
+      {/* 倒數計時 */}
+      {!isGameCompleted && !isGameOver && (
+        <pixiText
+          text={timing}
+          x={768 - 70}
+          y={50}
+          anchor={{ x: 0.5, y: 0.5 }}
+          style={{
+            fill: "white",
+            fontSize: 36,
+            fontWeight: "bold",
+          }}
+        />
+      )}
 
       {/* 幽靈 */}
       <pixiContainer
