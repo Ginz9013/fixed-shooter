@@ -1,6 +1,6 @@
 
-import { extend } from "@pixi/react";
-import { Container, Text } from "pixi.js";
+import { extend, useApplication } from "@pixi/react";
+import { Container, Text, Ticker } from "pixi.js";
 import Background from "../components/Background";
 import { useGhost } from "../hooks/useGhost";
 import { useGhostGroupMovement } from "../hooks/useGhostGroupMovement";
@@ -11,7 +11,8 @@ import { useCharBullet } from "../hooks/useCharBullet";
 import Ghost from "../components/Ghost";
 import Character from "./Character";
 import CharBullet from "./CharBullet";
-import { GHOST_GROUP_INIT_X, GHOST_GROUP_INIT_Y } from "../config/game";
+import { GHOST_GROUP_INIT_X, GHOST_GROUP_INIT_Y, LEFT_BOUND, MOVE_SPEED, RIGHT_BOUND, SHOOT_INTERVAL_MS } from "../config/game";
+import { useEffect } from "react";
 // import GhostBullet from "./GhostBullet";
 // import Heart from "./Heart";
 // import { useHearts } from "../hooks/useHearts";
@@ -27,24 +28,61 @@ extend({
 });
 
 const Game = () => {
+  const { app } = useApplication();
 
   // 血量 & 是否結束遊戲
   // const { hearts, takeDamage, isGameOver } = useHearts();
 
+  // 角色
+  const { charRef, moveDir } = useCharacter();
+  // 角色子彈狀態
+  const { charBullets, handleCharBulletMount, onCharFire, updateCharBullets } = useCharBullet();
+
   // 幽靈群
   const { ghosts, ghostRefs, handleGhostMount, handleGhostBatchDelete } = useGhost();
   // 幽靈群組
-  const { ghostGroupRef } = useGhostGroupMovement();
+  const { ghostGroupRef, bobbing } = useGhostGroupMovement();
 
   // 幽靈子彈狀態
   // const { bullets, createBullet, updateBullets } = useGhostBullet(takeDamage);
 
-  // 角色
-  const { charRef } = useCharacter();
 
-  // 角色子彈狀態
-  const { charBullets, handleCharBulletMount, onCharFire } = useCharBullet({ charRef, ghostRefs, handleGhostBatchDelete });
 
+  // Game Loop
+  useEffect(() => {
+    // 角色每隔 2 秒發射子彈
+    const timer = setInterval(() => {
+      onCharFire(charRef);
+    }, SHOOT_INTERVAL_MS);
+
+    const gameLoop = (ticker: Ticker) => {
+      // 更新角色位置
+      if (charRef.current && moveDir.current !== 0) {
+        const nextX = Math.max(
+          LEFT_BOUND,
+          Math.min(RIGHT_BOUND, charRef.current.x + MOVE_SPEED * moveDir.current)
+        );
+        charRef.current.x = nextX;
+      }
+
+      
+      // 控制幽靈群組位置 & 上下漂浮
+      if(!ghostGroupRef.current) return;
+      bobbing(ticker.deltaTime);
+
+
+      // 更新角色子彈
+      updateCharBullets(ticker.deltaTime, ghostRefs, handleGhostBatchDelete);
+    };
+
+    app.ticker.add(gameLoop);
+
+    return () => {
+      app.ticker.remove(gameLoop);
+      clearInterval(timer)
+    };
+  }, [onCharFire]);
+  
   // 控制射擊的方法
   // const handleGhostShoot = useCallback(
   //   (x: number, y: number) => {
@@ -122,7 +160,7 @@ const Game = () => {
         />
       ))} */}
 
-      <Character ref={charRef} onFire={onCharFire} />
+      <Character ref={charRef} />
       {/* {!isGameOver && (
         <Character x={charX.current} />
       )} */}

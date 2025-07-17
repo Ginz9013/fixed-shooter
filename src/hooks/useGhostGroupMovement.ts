@@ -1,9 +1,7 @@
-import { useEffect, useRef } from "react";
-import type { Container, Ticker } from "pixi.js";
-import { useApplication } from "@pixi/react";
+import { useRef } from "react";
+import type { Container } from "pixi.js";
 
 export const useGhostGroupMovement = () => {
-  const { app } = useApplication();
   
   // 幽靈群組的 Ref
   const ghostGroupRef = useRef<Container>(null);
@@ -19,19 +17,6 @@ export const useGhostGroupMovement = () => {
     if (next < 100) direction.current = 1;
     ghostGroupRef.current.y = next;
   };
-
-  // 控制幽靈群組位置 & 上下漂浮
-  useEffect(() => {
-    if(!ghostGroupRef.current) return;
-
-    const tick = (ticker: Ticker) => bobbing(ticker.deltaTime);
-    app.ticker.add(tick);
-
-    return () => {
-      app.ticker.remove(tick);
-    }
-
-  }, [ghostGroupRef.current]);
 
   return {
     ghostGroupRef,

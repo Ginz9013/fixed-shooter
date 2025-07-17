@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { useCallback, useRef, useState, type RefObject } from "react";
 import { checkCollision } from "../utils/game";
 import { CHARACTER_Y_POSITION, CHAR_BULLET_SPEED } from "../config/game";
-import type { Sprite, Ticker } from "pixi.js";
-import { useApplication } from "@pixi/react";
+import type { Sprite } from "pixi.js";
 
 // 子彈類型
 type CharBulletType = "normal" | "bomb";
@@ -15,14 +14,7 @@ export interface CharBulletData {
   type: CharBulletType;
 }
 
-type UseCharBulletProps = {
-  charRef: RefObject<Sprite | null>;
-  ghostRefs: RefObject<Map<number, Sprite>>;
-  handleGhostBatchDelete: (ids: number[]) => void;
-}
-
-export const useCharBullet = ({ charRef, ghostRefs, handleGhostBatchDelete }: UseCharBulletProps) => {
-  const { app } = useApplication();
+export const useCharBullet = () => {
 
   // 角色子彈資料
   const [charBullets, setCharBullets] = useState<CharBulletData[]>([]);
@@ -47,7 +39,7 @@ export const useCharBullet = ({ charRef, ghostRefs, handleGhostBatchDelete }: Us
   }, []);
 
   // 角色開火 - 建立新子彈
-  const onCharFire = useCallback(() => {
+  const onCharFire = useCallback((charRef: RefObject<Sprite | null>) => {
     if (!charRef.current) return;
 
     const newBullet: CharBulletData = {
@@ -60,18 +52,15 @@ export const useCharBullet = ({ charRef, ghostRefs, handleGhostBatchDelete }: Us
   }, []);
 
   // 更新子彈移動，判斷出界、擊中幽靈
-  const updateCharBullets = useCallback((deltaTime: number) => {
+  const updateCharBullets = useCallback((
+    deltaTime: number,
+    ghostRefs: RefObject<Map<number, Sprite>>,
+    handleGhostBatchDelete: (ids: number[]) => void,
+  ) => {
     const ghostsToRemove: number[] = [];
     const bulletsToRemove: number[] = [];
 
     charBulletRefs.current.forEach((bullet, bulletId) => {
-      // const bulletBounds = bullet.getBounds(true);
-      // if (bulletBounds.width > 50) { // 假設子彈寬度不可能超過 50
-      //   // 如果邊界框異常巨大，則跳過這一幀的處理
-      //   // 在下一幀，它很可能已經被正確渲染了
-      //   return;
-      // }
-
       let hitGhost = false;
 
       // 更新子彈位置
@@ -88,13 +77,6 @@ export const useCharBullet = ({ charRef, ghostRefs, handleGhostBatchDelete }: Us
 
           // 發生碰撞
           if (isCollision) {
-            // 【偵錯點 2】如果發生碰撞，印出雙方的邊界資訊
-            console.log(`Collision Detected! Bullet ID: ${bulletId}, Ghost ID: ${ghostId}`);
-            console.log('Bullet:');
-            console.log(bullet);
-            console.log('Ghost Bounds:', ghost.getBounds(true));
-
-
             hitGhost = true;
             // 把幽靈推到待刪清單中
             ghostsToRemove.push(ghostId);
@@ -113,17 +95,6 @@ export const useCharBullet = ({ charRef, ghostRefs, handleGhostBatchDelete }: Us
     handleCharBulletBatchDelete(bulletsToRemove);
   }, []);
 
-  useEffect(() => {
-    const tick = (ticker: Ticker) => {
-      updateCharBullets(ticker.deltaTime);
-    };
-
-    app.ticker.add(tick);
-
-    return () => {
-      app.ticker.remove(tick);
-    }
-  }, []);
 
   return {
     charBullets,
