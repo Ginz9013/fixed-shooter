@@ -38,6 +38,12 @@ export const useCharBullet = () => {
     ids.forEach(id => charBulletRefs.current.delete(id));
   }, []);
 
+  // 重置 - 清空子彈
+  const clearCharBullets = () => {
+    setCharBullets([]);
+    charBulletRefs.current.clear();
+  };
+
   // 角色開火 - 建立新子彈
   const onCharFire = useCallback((charRef: RefObject<Sprite | null>) => {
     if (!charRef.current) return;
@@ -67,7 +73,7 @@ export const useCharBullet = () => {
         // 在下一幀，它很可能已經被正確渲染了
         return;
       }
-      
+
       let hitGhost = false;
 
       // 更新子彈位置
@@ -107,6 +113,7 @@ export const useCharBullet = () => {
     charBullets,
     charBulletRefs,
     handleCharBulletMount,
+    clearCharBullets,
     onCharFire,
     updateCharBullets,
   };

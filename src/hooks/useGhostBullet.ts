@@ -14,16 +14,29 @@ export interface BulletData {
 export const useGhostBullet = () => {
   
   // 幽靈子彈資料狀態
-  const [ghostBullets, setghostBullets] = useState<BulletData[]>([]);
+  const [ghostBullets, setGhostBullets] = useState<BulletData[]>([]);
   // 幽靈子彈實體註冊列表
   const ghostBulletRefs = useRef<Map<number, Sprite>>(new Map());
   // 當前子彈序列編號
   const nextBulletId = useRef(0);
 
   // 把新的子彈實體加入註冊列表
-  const handleGhostBulletMount = (id: number, bullet: Sprite) => {
+  const handleGhostBulletMount = useCallback((id: number, bullet: Sprite) => {
     ghostBulletRefs.current.set(id, bullet);
-  }
+  }, []);
+
+  // 批次刪除子彈
+  const handleGhostBulletBatchDelete = useCallback((ids: number[]) => {
+    setGhostBullets(prev =>
+      prev.filter(bullet => !ids.includes(bullet.id))
+    );
+    ids.forEach(id => ghostBulletRefs.current.delete(id));
+  }, []);
+
+  const clearGhostBullets = () => {
+    setGhostBullets([]);
+    ghostBulletRefs.current.clear();
+  };
 
   // 幽靈開火 - 建立新子彈
   const onGhostFire = useCallback((ghost: Sprite) => {
@@ -33,63 +46,52 @@ export const useGhostBullet = () => {
       y: ghost.getBounds(true).y + 20,
       vy: GHOST_BULLET_SPEED,
     };
-    setghostBullets(prevBullets => [...prevBullets, newBullet]);
+    setGhostBullets(prevBullets => [...prevBullets, newBullet]);
   }, []);
 
-  // const updateBullets = useCallback(
-  //   (deltaTime: number, charX: number) => {
-  //     setBullets((currentBullets) => {
-  //       const screenHeight = window.innerHeight;
-  //       const charRect = {
-  //         x: charX,
-  //         y: CHARACTER_Y_POSITION,
-  //         width: CHARACTER_SIZE,
-  //         height: CHARACTER_SIZE,
-  //       };
+  // 更新子彈移動，判斷出界、擊中角色
+  const updateGhostBullets = useCallback((
+    deltaTime: number,
+    character: Sprite,
+    takeDamage: () => void
+  ) => {
+    const bulletsToRemove: number[] = [];
+    let hitCharactor = false;
 
-  //       let damageTakenThisFrame = false;
+    ghostBulletRefs.current.forEach((bullet, bulletId) => {
+      // 更新子彈位置
+      bullet.y += GHOST_BULLET_SPEED * deltaTime;
 
-  //       const newBullets = currentBullets.reduce<BulletData[]>((acc, bullet) => {
-  //         const movedBullet = {
-  //           ...bullet,
-  //           y: bullet.y + bullet.vy * deltaTime,
-  //         };
+      // 檢查是否超出邊界 (y > screenHeight)
+      if (bullet.y > window.innerHeight) {
+        bulletsToRemove.push(bulletId);
+      } else {
 
-  //         // 檢查是否超出邊界
-  //         if (movedBullet.y >= screenHeight) {
-  //           return acc; // 跳過這顆子彈
-  //         }
+        // 檢查與角色的碰撞
+        const isCollision = checkCollision(bullet, character);
 
-  //         const bulletRect = {
-  //           x: movedBullet.x,
-  //           y: movedBullet.y,
-  //           width: 12,
-  //           height: 24,
-  //         };
+        if (isCollision) {
+          if (!hitCharactor) {
+            takeDamage(); // 一幀中只會造成傷害一次
+            hitCharactor = true;
+          }
+          // 把子彈推到待刪清單中
+          bulletsToRemove.push(bulletId);
+        }
+      }
+    });
 
-  //         const isCollision = checkCollision(charRect, bulletRect);
-  //         if (isCollision) {
-  //           // 發生碰撞
-  //           if (!damageTakenThisFrame) {
-  //             takeDamage(); // 每幀只扣一次血
-  //             damageTakenThisFrame = true;
-  //           }
-  //           return acc; // 不將這顆子彈加入 newBullets
-  //         } else {
-  //           acc.push(movedBullet); // 將沒有碰撞的子彈加入新陣列
-  //         }
-  //         return acc;
-  //       }, []);
-
-  //       return newBullets;
-  //     });
-  //   },
-  //   [takeDamage]
-  // );
+    // 移除出界或擊中角色的子彈
+    handleGhostBulletBatchDelete(bulletsToRemove);
+  }, []);
 
   return {
     ghostBullets,
+    ghostBulletRefs,
     handleGhostBulletMount,
+    handleGhostBulletBatchDelete,
+    clearGhostBullets,
     onGhostFire,
+    updateGhostBullets,
   };
 };

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { extend, useApplication } from "@pixi/react";
 import { Container, Text, Ticker } from "pixi.js";
 import Background from "../components/Background";
@@ -33,19 +33,23 @@ const Game = () => {
   const { app } = useApplication();
 
   // 血量 & 是否結束遊戲
-  const { hearts, takeDamage, isGameOver } = useHearts();
+  const { hearts, takeDamage } = useHearts();
 
   // 角色
   const { charRef, moveDir } = useCharacter();
   // 角色子彈狀態
-  const { charBullets, handleCharBulletMount, onCharFire, updateCharBullets } = useCharBullet();
+  const { charBullets, handleCharBulletMount, clearCharBullets, onCharFire, updateCharBullets } = useCharBullet();
 
   // 幽靈群
   const { ghosts, ghostRefs, handleGhostMount, handleGhostBatchDelete } = useGhost();
   // 幽靈群組
   const { ghostGroupRef, bobbing } = useGhostGroupMovement();
   // 幽靈子彈狀態
-  const { ghostBullets, handleGhostBulletMount, onGhostFire } = useGhostBullet();
+  const { ghostBullets, handleGhostBulletMount, clearGhostBullets, onGhostFire, updateGhostBullets } = useGhostBullet();
+
+  // 遊戲結束
+  const isGameOver = useMemo(() => hearts.current.length <= 0, [hearts]);
+  const isGameCompleted = useMemo(() => ghosts.length <= 0, [ghosts]);
 
 
 
@@ -57,8 +61,10 @@ const Game = () => {
     }, SHOOT_INTERVAL_MS);
 
     const gameLoop = (ticker: Ticker) => {
+      if(!ghostGroupRef.current || !charRef.current) return;
+
       // 更新角色位置
-      if (charRef.current && moveDir.current !== 0) {
+      if (moveDir.current !== 0) {
         const nextX = Math.max(
           LEFT_BOUND,
           Math.min(RIGHT_BOUND, charRef.current.x + MOVE_SPEED * moveDir.current)
@@ -71,7 +77,7 @@ const Game = () => {
 
       
       // 控制幽靈群組位置 & 上下漂浮
-      if(!ghostGroupRef.current) return;
+      
       bobbing(ticker.deltaTime);
 
       // 幽靈根據機率發射子彈
@@ -83,6 +89,9 @@ const Game = () => {
           onGhostFire(ghost);
         }
       })
+
+      // 更新幽靈子彈位置
+      updateGhostBullets(ticker.deltaTime, charRef.current, takeDamage);
       
     };
 
@@ -93,46 +102,11 @@ const Game = () => {
       clearInterval(timer)
     };
   }, [onCharFire]);
-  
-  // 控制射擊的方法
-  // const handleGhostShoot = useCallback(
-  //   (x: number, y: number) => {
-  //     if (isGameOver) return; // 遊戲結束後不再射擊
 
-  //     createBullet(x + groupX, y + groupY.current, 3);
-  //   },
-  //   [groupX, isGameOver, createBullet, groupY]
-  // );
-
-  // useEffect(() => {
-  //   const timer = setInterval(() => {
-  //     onCharFire(charX.current);
-  //   }, SHOOT_INTERVAL_MS);
-
-  //   return () => clearInterval(timer);
-  // }, [onCharFire]);
-
-  // useEffect(() => {
-  //   // 用 ticker 滑順處理動畫相關狀態
-  //   // 1. 幽靈的晃動
-  //   // 2. 幽靈子彈移動
-  //   // 3. 幽靈子彈的碰撞
-  //   const tick = (ticker: Ticker) => {
-  //     if (isGameOver) {
-  //       app.ticker.remove(tick);
-  //       return;
-  //     }
-
-  //     updateBullets(ticker.deltaTime, charX.current);
-  //     updateCharBullets(ticker.deltaTime, ghosts.current, groupX, groupY.current);
-  //   };
-
-  //   app.ticker.add(tick);
-
-  //   return () => {
-  //     app.ticker.remove(tick);
-  //   };
-  // }, [app, isGameOver, updateBullets, bobbing, updateCharBullets, ghosts, groupX, groupY]);
+  useEffect(() => {
+    clearGhostBullets();
+    clearCharBullets();
+  }, [isGameOver, isGameCompleted]);
 
 
   return (
@@ -157,13 +131,12 @@ const Game = () => {
             x={ghost.x}
             y={ghost.y}
             onMount={handleGhostMount}
-            // onShoot={handleGhostShoot}
           />
         ))}
       </pixiContainer>
 
       {/* 幽靈子彈 */}
-      {ghostBullets.map((bullet) => (
+      {!isGameCompleted && !isGameOver && ghostBullets.map((bullet) => (
         <GhostBullet
           key={bullet.id}
           id={bullet.id}
@@ -173,14 +146,10 @@ const Game = () => {
         />
       ))}
 
-      <Character ref={charRef} />
-      {/* {!isGameOver && (
-        <Character x={charX.current} />
-      )} */}
+      {!isGameOver && <Character ref={charRef} />}
 
       {/* 角色子彈 */}
-      {/* {!isGameCompleted && !isGameOver && charBullets.current.map((bullet) => ( */}
-      {charBullets.map((bullet) => (
+      {!isGameCompleted && !isGameOver && charBullets.map((bullet) => (
         <CharBullet
           id={bullet.id}
           key={bullet.id}
@@ -190,7 +159,7 @@ const Game = () => {
         />
       ))}
 
-      {/* {(isGameCompleted || isGameOver) && (
+      {(isGameCompleted || isGameOver) && (
         <pixiText
           text={ isGameCompleted ? "You Win" : "Game Over"}
           x={768 / 2}
@@ -202,7 +171,7 @@ const Game = () => {
             fontWeight: "bold",
           }}
         />
-      )} */}
+      )}
 
       {/* Background */}
       <Background />
