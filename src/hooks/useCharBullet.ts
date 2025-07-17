@@ -61,6 +61,13 @@ export const useCharBullet = () => {
     const bulletsToRemove: number[] = [];
 
     charBulletRefs.current.forEach((bullet, bulletId) => {
+      const bulletBounds = bullet.getBounds(true);
+      if (bulletBounds.width > 50) { // 假設子彈寬度不可能超過 50
+        // 如果邊界框異常巨大，則跳過這一幀的處理
+        // 在下一幀，它很可能已經被正確渲染了
+        return;
+      }
+      
       let hitGhost = false;
 
       // 更新子彈位置
