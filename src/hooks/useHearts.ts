@@ -1,29 +1,21 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
-// 血量型態
-type HeartType = "heart" | "shield";
-
-// 定義血量資訊
-export interface HeartInfo {
+export interface HeartData {
   x: number;
-  type: HeartType;
+  type: "heart" | "shield";
 }
 
-const defaultHearts: HeartInfo[] = [
-  { x: 0, type: "heart" },
-  { x: 60, type: "heart" },
-  { x: 120, type: "heart" },
-  { x: 180, type: "shield" },
-];
+export const useHearts = (initialHealth: number) => {
+  const [hearts, setHearts] = useState<HeartData[]>(
+    Array.from({ length: initialHealth }, (_, i) => ({
+      x: i * 40,
+      type: i < 3 ? "heart" : "shield",
+    }))
+  );
 
-export const useHearts = () => {
-  // 血量
-  const [hearts, setHearts] = useState<HeartInfo[]>(defaultHearts);
+  const takeDamage = useCallback(() => {
+    setHearts(prev => prev.slice(0, -1));
+  }, []);
 
-  const takeDamage = () => setHearts(prev => prev.length > 0 ? prev.slice(0, -1) : prev);
-
-  return {
-    hearts,
-    takeDamage,
-  };
+  return { hearts, takeDamage };
 };

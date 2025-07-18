@@ -6,14 +6,28 @@ import {
   CHARACTER_Y_POSITION,
   CHARACTER_X_INIT_POSITION,
 } from "../config/game";
+import type { CharacterId } from "../config/characters";
 
 extend({
   Sprite,
 });
 
-const Character = forwardRef<Sprite>((_, ref) => {
+const charTextureMap: Record<CharacterId, string> = {
+  red: "/assets/レンジャー（レッド）.png",
+  yellow: "/assets/レンジャー（イエロー）.png",
+  green: "/assets/レンジャー（グリーン）.png",
+  pink: "/assets/レンジャー（ピンク）.png",
+  blue: "/assets/レンジャー（ブルー）.png",
+  kappa: "/assets/河童（かっぱ）.png",
+}
 
-  const texture = Assets.get("/assets/レンジャー（レッド）.png");
+type CharacterProps = {
+  charId: CharacterId;
+}
+
+const Character = forwardRef<Sprite, CharacterProps>(({ charId }, ref) => {
+
+  const texture = Assets.get(charTextureMap[charId]);
 
   return (
     <pixiSprite

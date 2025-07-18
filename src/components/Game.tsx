@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { extend } from "@pixi/react";
 import { Container, Text } from "pixi.js";
 
@@ -9,6 +10,7 @@ import Heart from "./Heart";
 import GhostBullet from "./GhostBullet";
 
 import { useGameManager } from "../hooks/useGameManager";
+import { CHARACTER_SPECS, type CharacterSpec } from "../config/characters";
 
 import {
   GHOST_GROUP_INIT_X,
@@ -22,7 +24,10 @@ extend({
 });
 
 const Game = () => {
-  
+  // 預設選擇一台戰機，未來可以讓玩家選擇
+  const [character, setCharacter] = useState<CharacterSpec>(CHARACTER_SPECS.blue);
+
+  // 呼叫核心邏輯 Hook
   const {
     // 愛心
     hearts,
@@ -45,7 +50,8 @@ const Game = () => {
     // 遊戲狀態
     isGameOver,
     isGameCompleted,
-  } = useGameManager();
+  } = useGameManager(character);
+
 
   return (
     <pixiContainer x={0} y={0}>
@@ -114,7 +120,7 @@ const Game = () => {
         />
       ))}
 
-      {!isGameOver && <Character ref={charRef} />}
+      {!isGameOver && <Character ref={charRef} charId={character.id} />}
 
       {/* 角色子彈 */}
       {!isGameCompleted && !isGameOver && charBullets.map((bullet) => (

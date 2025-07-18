@@ -8,13 +8,14 @@ import { useCharBullet } from "./useCharBullet";
 import { useHearts } from "./useHearts";
 import { useGhostBullet } from "./useGhostBullet";
 import { SHOOT_INTERVAL_MS, LEFT_BOUND, RIGHT_BOUND, MOVE_SPEED, SHOOTING_PROBABILITY } from "../config/game";
+import type { CharacterSpec } from "../config/characters";
 
 
-export const useGameManager = () => {
+export const useGameManager = (characterSpec: CharacterSpec) => {
   const { app } = useApplication();
 
-  // 血量 & 是否結束遊戲
-  const { hearts, takeDamage } = useHearts();
+  // 血量 & 是否結束遊戲 (使用 characterSpec 初始化)
+  const { hearts, takeDamage } = useHearts(characterSpec.initialHealth);
 
   // 角色
   const { charRef, moveDir } = useCharacter();
@@ -39,31 +40,34 @@ export const useGameManager = () => {
   const isGameCompleted = useMemo(() => ghosts.length <= 0, [ghosts]);
 
   // 加分方法
-  const addScore = useCallback((score: number) => setScore(prev => prev + score), [setScore]);
+  const addScore = useCallback((score: number) => setScore(prev => prev + score), []);
 
 
-  // Game Loop
+  // 倒數計時
   useEffect(() => {
-    // 當遊戲結束時，清空子彈並停止遊戲
-    if (isGameOver || isGameCompleted) {
-      clearGhostBullets();
-      clearCharBullets();
-      return;
-    };
-
-
-    // 倒數計時
     const countDownTimer = setInterval(() => {
       setTiming(prev => prev - 1);
     }, 1000);
 
-
-    // 角色每隔 2 秒發射子彈
-    const timer = setInterval(() => {
-      onCharFire(charRef);
-    }, SHOOT_INTERVAL_MS);
+    return () => clearInterval(countDownTimer);
+  }, []);
 
 
+  // 每 2 秒角色射擊一次
+  useEffect(() => {
+    // 根據角色攻速調整射擊間隔
+    const shootInterval = SHOOT_INTERVAL_MS / characterSpec.attackSpeedModifier;
+    const shootTimer = setInterval(() => {
+      // 將連射設定傳遞給 onCharFire
+      onCharFire(charRef, characterSpec.burstFire);
+    }, shootInterval);
+    
+    return () => clearInterval(shootTimer);
+  }, []);
+
+
+  // Game Loop
+  useEffect(() => {
     // 主要的遊戲循環
     const gameLoop = (ticker: Ticker) => {
       if(!ghostGroupRef.current || !charRef.current) return;
@@ -82,7 +86,6 @@ export const useGameManager = () => {
 
       
       // 控制幽靈群組位置 & 上下漂浮
-      
       bobbing(ticker.deltaTime);
 
       // 幽靈根據機率發射子彈
@@ -93,7 +96,7 @@ export const useGameManager = () => {
           if (isGameOver) return; // 遊戲結束後不再射擊
           onGhostFire(ghost);
         }
-      })
+      });
 
       // 更新幽靈子彈位置
       updateGhostBullets(ticker.deltaTime, charRef.current, takeDamage);
@@ -103,11 +106,10 @@ export const useGameManager = () => {
 
     return () => {
       app.ticker.remove(gameLoop);
-      clearInterval(timer);
-      clearInterval(countDownTimer);
     };
   }, [
     app.ticker,
+    characterSpec, // 將 characterSpec 加入依賴
     charRef,
     moveDir,
     onCharFire,
@@ -123,7 +125,17 @@ export const useGameManager = () => {
     clearCharBullets,
     isGameCompleted,
     isGameOver,
+    setTiming,
   ]);
+
+  // 當遊戲結束時，清空子彈並停止遊戲
+  useEffect(() => {
+    if (isGameOver || isGameCompleted) {
+      clearGhostBullets();
+      clearCharBullets();
+      return;
+    };
+  }, [isGameOver, isGameCompleted]);
 
   return {
     // 愛心

@@ -2,6 +2,7 @@ import { useCallback, useRef, useState, type RefObject } from "react";
 import { checkCollision } from "../utils/game";
 import { CHARACTER_Y_POSITION, CHAR_BULLET_SPEED } from "../config/game";
 import type { Sprite } from "pixi.js";
+import type { CharacterSpec } from "../config/characters";
 
 // 子彈類型
 type CharBulletType = "normal" | "bomb";
@@ -39,23 +40,45 @@ export const useCharBullet = () => {
   }, []);
 
   // 重置 - 清空子彈
-  const clearCharBullets = () => {
+  const clearCharBullets = useCallback(() => {
     setCharBullets([]);
     charBulletRefs.current.clear();
-  };
-
-  // 角色開火 - 建立新子彈
-  const onCharFire = useCallback((charRef: RefObject<Sprite | null>) => {
-    if (!charRef.current) return;
-
-    const newBullet: CharBulletData = {
-      id: nextBulletId.current++,
-      x: charRef.current.x + 10,
-      y: CHARACTER_Y_POSITION - 50,
-      type: "normal",
-    };
-    setCharBullets(prev => [...prev, newBullet]);
   }, []);
+
+  // 角色開火 - 建立新子彈 (使用遞迴 setTimeout 解決閉包問題)
+  const onCharFire = useCallback((charRef: RefObject<Sprite | null>, burstFire: CharacterSpec['burstFire']) => {
+    const { count, delayMs } = burstFire;
+
+    // 定義一個遞迴函式來處理連射
+    const fireRecursive = (shotsLeft: number) => {
+      // 基本情況：如果沒有子彈要發射了，就停止
+      if (shotsLeft <= 0 || !charRef.current) {
+        return;
+      }
+
+      // --- 發射一枚子彈 ---
+      // 在這裡，我們讀取的是「現在」的角色位置
+      const newBullet: CharBulletData = {
+        id: nextBulletId.current++,
+        x: charRef.current.x + 10,
+        y: CHARACTER_Y_POSITION - 50,
+        type: "normal",
+      };
+      setCharBullets(prev => [...prev, newBullet]);
+      // --------------------
+
+      // 如果還有子彈需要連射，則設定下一次的發射
+      if (shotsLeft > 1) {
+        setTimeout(() => {
+          fireRecursive(shotsLeft - 1);
+        }, delayMs);
+      }
+    };
+
+    // 啟動連射
+    fireRecursive(count);
+
+  }, [setCharBullets]);
 
   // 更新子彈移動，判斷出界、擊中幽靈
   const updateCharBullets = useCallback((
