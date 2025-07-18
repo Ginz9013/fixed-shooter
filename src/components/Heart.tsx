@@ -1,12 +1,12 @@
 import { extend } from "@pixi/react";
 import { Assets, Sprite } from "pixi.js";
-import { type HeartInfo } from "../hooks/useHearts";
+import { type HeartData } from "../hooks/useHearts";
 
 extend({
   Sprite,
 });
 
-const Heart: React.FC<HeartInfo> = ({ x, type }) => {
+const Heart: React.FC<HeartData> = ({ x, type }) => {
 
   const texture = Assets.get(type === "heart"
     ? "/assets/赤色のハート.png"

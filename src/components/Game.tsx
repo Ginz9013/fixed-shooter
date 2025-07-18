@@ -25,7 +25,7 @@ extend({
 
 const Game = () => {
   // 預設選擇一台戰機，未來可以讓玩家選擇
-  const [character, setCharacter] = useState<CharacterSpec>(CHARACTER_SPECS.blue);
+  const [character, _setCharacter] = useState<CharacterSpec>(CHARACTER_SPECS.blue);
 
   // 呼叫核心邏輯 Hook
   const {
