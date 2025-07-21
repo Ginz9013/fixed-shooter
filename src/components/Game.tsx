@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { extend } from "@pixi/react";
 import { Container, Text } from "pixi.js";
 
@@ -10,7 +9,7 @@ import Heart from "./Heart";
 import GhostBullet from "./GhostBullet";
 
 import { useGameManager } from "../hooks/useGameManager";
-import { CHARACTER_SPECS, type CharacterSpec } from "../config/characters";
+import { type CharacterSpec } from "../config/characters";
 
 import {
   GHOST_GROUP_INIT_X,
@@ -23,9 +22,11 @@ extend({
   Text,
 });
 
-const Game = () => {
-  // 預設選擇一台戰機，未來可以讓玩家選擇
-  const [character, _setCharacter] = useState<CharacterSpec>(CHARACTER_SPECS.blue);
+type GameProps = {
+  character: CharacterSpec;
+}
+
+const Game: React.FC<GameProps> = ({ character }) => {
 
   // 呼叫核心邏輯 Hook
   const {

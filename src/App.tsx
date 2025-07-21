@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Application } from "@pixi/react";
 import { Assets } from "pixi.js";
 import Game from "./components/Game";
+import Selection from "./components/Selection/Selection";
+import { CHARACTER_SPECS, type CharacterSpec } from "./config/characters";
 
 
 const assetList = [
@@ -25,6 +27,11 @@ const App = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const divRef = useRef<HTMLDivElement>(null);
 
+  // 開始遊戲
+  const [gameStart, setGameStart] = useState<boolean>(false);
+  // 預設選擇一台戰機，未來可以讓玩家選擇
+  const [character, setCharacter] = useState<CharacterSpec>(CHARACTER_SPECS.blue);
+
   // 讀取圖片資源
   useEffect(() => {
     Assets.load(assetList).then(() => setIsLoading(false));
@@ -34,14 +41,18 @@ const App = () => {
     <div className="w-screen h-screen flex justify-center items-center bg-black">
 
       {/* Pixi Container */}
-      <div ref={divRef} className="border flex justify-center items-center w-[768px] h-full">
-        {isLoading ? (
-          <p>Loading...</p>
-        ) : (
-          <Application resizeTo={divRef}>
-            <Game />
-          </Application> 
-        )}
+      <div ref={divRef} className="border border-gray-500 flex justify-center items-center w-[768px] h-full">
+        {isLoading
+          ? <p>Loading...</p>
+          : !gameStart
+            ? <Selection
+                setCharacter={setCharacter}
+                setGameStart={setGameStart}  
+              />
+            : <Application resizeTo={divRef}>
+                <Game character={character} />
+              </Application> 
+        }
       </div>
     </div>
   )
