@@ -18,6 +18,10 @@ const Graphic = () => {
     <pixiGraphics
       // draw 的 callback 會在每次 tick 的時候重新執行進行繪製
       draw={drawCallback}
+      // 開啟互動
+      interactive={true}
+      onClick={() => console.log("click")}
+      onMouseOver={() => console.log("mouseOver")}
     />
   );
 };
