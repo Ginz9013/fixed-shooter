@@ -13,7 +13,7 @@ export interface CharacterSpec {
     // 連射時，每發子彈之間的間隔時間 (毫秒)
     delayMs: number;
   };
-  // 射速倍率，1.15 代表 +15%
+  // 射速倍率，0.85 代表 +15%
   attackSpeedModifier: number;
   initialHealth: number;
   special: SpecialAbility;
@@ -25,7 +25,7 @@ export const CHARACTER_SPECS: Record<string, CharacterSpec> = {
     id: "red",
     name: "レンジャー（レッド）",
     burstFire: { count: 1, delayMs: 0 },
-    attackSpeedModifier: 1.0,
+    attackSpeedModifier: 1,
     initialHealth: 3,
     special: { type: "NONE", cooldown: 0 },
   },
@@ -34,7 +34,7 @@ export const CHARACTER_SPECS: Record<string, CharacterSpec> = {
     id: "yellow",
     name: "レンジャー（イエロー）",
     burstFire: { count: 4, delayMs: 150 },
-    attackSpeedModifier: 1.3,
+    attackSpeedModifier: 0.7,
     initialHealth: 3,
     special: { type: "BIG_BOMB", cooldown: 10000 },
   },
@@ -43,7 +43,7 @@ export const CHARACTER_SPECS: Record<string, CharacterSpec> = {
     id: "pink",
     name: "レンジャー（ピンク）",
     burstFire: { count: 4, delayMs: 150 },
-    attackSpeedModifier: 1.3,
+    attackSpeedModifier: 0.7,
     initialHealth: 3,
     special: { type: "NONE", cooldown: 0 },
   },
@@ -52,7 +52,7 @@ export const CHARACTER_SPECS: Record<string, CharacterSpec> = {
     id: "green",
     name: "レンジャー（グリーン）",
     burstFire: { count: 3, delayMs: 150 },
-    attackSpeedModifier: 1.15,
+    attackSpeedModifier: 0.85,
     initialHealth: 3,
     special: { type: "NONE", cooldown: 0 },
   },
@@ -61,7 +61,7 @@ export const CHARACTER_SPECS: Record<string, CharacterSpec> = {
     id: "blue",
     name: "レンジャー（ブルー）",
     burstFire: { count: 3, delayMs: 150 },
-    attackSpeedModifier: 1.0,
+    attackSpeedModifier: 1,
     initialHealth: 5, // 3 + 2
     special: { type: "NONE", cooldown: 0 },
   },
@@ -70,7 +70,7 @@ export const CHARACTER_SPECS: Record<string, CharacterSpec> = {
     id: "kappa",
     name: "河童（かっぱ）",
     burstFire: { count: 3, delayMs: 150 },
-    attackSpeedModifier: 1.15,
+    attackSpeedModifier: 0.85,
     initialHealth: 3,
     special: { type: "SMALL_BOMB", cooldown: 20000 },
   },

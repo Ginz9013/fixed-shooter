@@ -59,7 +59,7 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
   // 每 2 秒角色射擊一次
   useEffect(() => {
     // 根據角色攻速調整射擊間隔
-    const shootInterval = SHOOT_INTERVAL_MS / characterSpec.attackSpeedModifier;
+    const shootInterval = SHOOT_INTERVAL_MS * characterSpec.attackSpeedModifier;
     const shootTimer = setInterval(() => {
       // 將連射設定傳遞給 onCharFire
       onCharFire(charRef, characterSpec.burstFire);
