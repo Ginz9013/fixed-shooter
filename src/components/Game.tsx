@@ -5,6 +5,7 @@ import Background from "../components/Background";
 import Ghost from "../components/Ghost";
 import Character from "./Character";
 import CharBullet from "./CharBullet";
+import CharBomb from "./CharBomb";
 import Heart from "./Heart";
 import GhostBullet from "./GhostBullet";
 
@@ -48,6 +49,9 @@ const Game: React.FC<GameProps> = ({ character }) => {
     // 角色子彈
     charBullets,
     handleCharBulletMount,
+    // 角色炸彈
+    charBombs,
+    handleCharBombMount,
     // 遊戲狀態
     isGameOver,
     isGameCompleted,
@@ -131,6 +135,18 @@ const Game: React.FC<GameProps> = ({ character }) => {
           x={bullet.x}
           y={bullet.y}
           onMount={handleCharBulletMount}
+        />
+      ))}
+
+      {/* 角色炸彈 */}
+      {!isGameCompleted && !isGameOver && charBombs.map((bomb) => (
+        <CharBomb
+          id={bomb.id}
+          key={bomb.id}
+          x={bomb.x}
+          y={bomb.y}
+          type={bomb.type}
+          onMount={handleCharBombMount}
         />
       ))}
 

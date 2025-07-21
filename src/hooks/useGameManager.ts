@@ -7,6 +7,7 @@ import { useCharacter } from "./useCharacter";
 import { useCharBullet } from "./useCharBullet";
 import { useHearts } from "./useHearts";
 import { useGhostBullet } from "./useGhostBullet";
+import { useCharBomb } from "./useCharBomb";
 import { SHOOT_INTERVAL_MS, LEFT_BOUND, RIGHT_BOUND, MOVE_SPEED, SHOOTING_PROBABILITY } from "../config/game";
 import type { CharacterSpec } from "../config/characters";
 
@@ -21,6 +22,8 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
   const { charRef, moveDir } = useCharacter();
   // 角色子彈狀態
   const { charBullets, handleCharBulletMount, clearCharBullets, onCharFire, updateCharBullets } = useCharBullet();
+  // 角色炸彈狀態
+  const { charBombs, handleCharBombMount, onCharFireBomb, updateCharBombs } = useCharBomb();
 
   // 幽靈群
   const { ghosts, ghostRefs, handleGhostMount, handleGhostBatchDelete } = useGhost();
@@ -65,6 +68,23 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
     return () => clearInterval(shootTimer);
   }, []);
 
+  // 每 N 秒角色丟一次炸彈
+  useEffect(() => {
+    // 如果沒有特殊能力就直接停止這個功能
+    if (characterSpec.special.type === "NONE") return;
+
+    // 根據角色特殊能力設定發射炸彈
+    const shootInterval = characterSpec.special.cooldown;
+    const bombType = characterSpec.special.type;
+
+    const shootTimer = setInterval(() => {
+      // 將連射設定傳遞給 onCharFire
+      onCharFireBomb(charRef, bombType);
+    }, shootInterval);
+    
+    return () => clearInterval(shootTimer);
+  }, []);
+
 
   // Game Loop
   useEffect(() => {
@@ -83,6 +103,15 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
 
       // 更新角色子彈
       updateCharBullets(ticker.deltaTime, ghostRefs, handleGhostBatchDelete, addScore);
+
+      // 更新角色炸彈
+      updateCharBombs(
+        ticker.deltaTime,
+        characterSpec.special.type,
+        ghostRefs,
+        handleGhostBatchDelete,
+        addScore,
+      );
 
       
       // 控制幽靈群組位置 & 上下漂浮
@@ -156,6 +185,9 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
     // 角色子彈
     charBullets,
     handleCharBulletMount,
+    // 角色炸彈
+    charBombs,
+    handleCharBombMount,
     // 遊戲狀態
     isGameOver,
     isGameCompleted,

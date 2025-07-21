@@ -1,5 +1,5 @@
 export interface SpecialAbility {
-  type: "BOMB_BIG" | "BOMB_SMALL" | "NONE";
+  type: "BIG_BOMB" | "SMALL_BOMB" | "NONE";
   cooldown: number; // in milliseconds
 }
 
@@ -36,7 +36,7 @@ export const CHARACTER_SPECS: Record<string, CharacterSpec> = {
     burstFire: { count: 4, delayMs: 150 },
     attackSpeedModifier: 1.3,
     initialHealth: 3,
-    special: { type: "BOMB_BIG", cooldown: 10000 },
+    special: { type: "BIG_BOMB", cooldown: 10000 },
   },
   // 一次連射 4 枚子彈 + 攻速 +30%
   pink: {
@@ -72,7 +72,7 @@ export const CHARACTER_SPECS: Record<string, CharacterSpec> = {
     burstFire: { count: 3, delayMs: 150 },
     attackSpeedModifier: 1.15,
     initialHealth: 3,
-    special: { type: "BOMB_SMALL", cooldown: 20000 },
+    special: { type: "SMALL_BOMB", cooldown: 20000 },
   },
 };
 

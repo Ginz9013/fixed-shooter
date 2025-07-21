@@ -15,6 +15,13 @@ export const CHAR_BULLET_HEIGHT = 100;
 export const CHAR_BULLET_SPEED = 10;
 export const SHOOT_INTERVAL_MS = 2000;
 
+// 角色炸彈
+export const CHAR_BOMB_WIDTH = 60;
+export const CHAR_BOMB_HEIGHT = 60;
+export const CHAR_BOMB_SPEED = 5;
+export const CHAR_SMALL_BOMB_SCOPE = 100;
+export const CHAR_BIG_BOMB_SCOPE = 200;
+
 // 幽靈
 export const GHOST_WIDTH = 50;
 export const GHOST_HEIGHT = 50;

@@ -19,6 +19,9 @@ const assetList = [
   "/assets/赤色のハート.png",
   "/assets/黄色のハート.png",
   "/assets/びっくりマーク.png",
+  "/assets/毒きのこ.png",
+  "/assets/バナナの皮.png",
+  "/assets/きゅうり.png",
 ];
 
 
