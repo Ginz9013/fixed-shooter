@@ -39,32 +39,45 @@ export interface GhostData {
 
 export const useGhost = () => {
   // 幽靈資料狀態
-  const [ghosts, setGhosts] = useState<GhostData[]>(initGhosts);
+  const ghosts = useRef<GhostData[]>(initGhosts);
   // 實體註冊表
   const ghostRefs = useRef<Map<number, Sprite>>(new Map);
 
-
+  
   const handleGhostMount = useCallback((id: number, ghost: Sprite) => {
     ghostRefs.current.set(id, ghost);
   }, []);
 
-  const handleGhostUnmount = useCallback((id: number) => {
-    ghostRefs.current.delete(id);
-  }, []);
-
   const handleGhostBatchDefeat = useCallback((ids: Set<number>) => {
-    setGhosts(prev => prev.map(ghost => ids.has(ghost.id) ? {...ghost, defeatedAt: Date.now()}: ghost));
+    ghosts.current.forEach(ghost => {
+      if (ids.has(ghost.id)) {
+        const sprite = ghostRefs.current.get(ghost.id);
+        
+        if (!sprite) return;
+
+        sprite.visible = false;
+        ghosts.current[ghost.id].defeatedAt = Date.now();
+      }
+    });
   }, []);
 
   const handleGhostBatchRespawn = useCallback((ids: Set<number>) => {
-    setGhosts(prev => prev.map(ghost => ids.has(ghost.id) ? {...ghost, defeatedAt: null}: ghost));
+    ghosts.current.forEach(ghost => {
+      if (ids.has(ghost.id)) {
+        const sprite = ghostRefs.current.get(ghost.id);
+        
+        if (!sprite) return;
+
+        sprite.visible = true;
+        ghosts.current[ghost.id].defeatedAt = null;
+      }
+    });
   }, []);
 
   return {
     ghosts,
     ghostRefs,
     handleGhostMount,
-    handleGhostUnmount,
     handleGhostBatchDefeat,
     handleGhostBatchRespawn,
   };

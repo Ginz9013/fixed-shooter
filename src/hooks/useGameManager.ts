@@ -26,7 +26,7 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
   const { charBombs, handleCharBombMount, onCharFireBomb, updateCharBombs } = useCharBomb();
 
   // 幽靈群
-  const { ghosts, ghostRefs, handleGhostMount, handleGhostUnmount, handleGhostBatchDefeat, handleGhostBatchRespawn } = useGhost();
+  const { ghosts, ghostRefs, handleGhostMount, handleGhostBatchDefeat, handleGhostBatchRespawn } = useGhost();
   // 幽靈群組
   const { ghostGroupRef, bobbing } = useGhostGroupMovement();
   // 幽靈子彈狀態
@@ -119,13 +119,8 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
       bobbing(ticker.deltaTime);
 
       // 幽靈根據機率發射子彈
-      ghostRefs.current.forEach((ghost) => {
-        if (Math.random() < SHOOTING_PROBABILITY) {
-          // 子彈初始位置
-          // 幽靈的中心點位置 + 微調修正
-          if (isGameOver) return; // 遊戲結束後不再射擊
-          onGhostFire(ghost);
-        }
+      ghostRefs.current.forEach(ghost => {
+        if (ghost.visible && Math.random() < SHOOTING_PROBABILITY && !isGameOver) onGhostFire(ghost);
       });
 
       // 更新幽靈子彈位置
@@ -134,10 +129,15 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
       // 幽靈重生
       const now = Date.now();
       const ghostToRespawn: Set<number> = new Set<number>();
-      ghosts.forEach(ghost => {
-        if (ghost.defeatedAt && now - ghost.defeatedAt > 5000) ghostToRespawn.add(ghost.id);
+
+      ghostRefs.current.forEach((ghost, id) => {
+        const defeatedAt = ghosts.current[id].defeatedAt;
+        if (!ghost.visible && defeatedAt && now - defeatedAt > 5000) ghostToRespawn.add(id);
       });
-      handleGhostBatchRespawn(ghostToRespawn);
+
+      if (ghostToRespawn.size > 0) {
+        handleGhostBatchRespawn(ghostToRespawn);
+      }
     };
 
     app.ticker.add(gameLoop);
@@ -151,10 +151,14 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
     moveDir,
     onCharFire,
     updateCharBullets,
+    updateCharBombs,
+    ghosts, // 依賴 ghosts 狀態
+    ghostRefs, // 依賴 ghostRefs
     bobbing,
     onGhostFire,
     updateGhostBullets,
     handleGhostBatchDefeat,
+    handleGhostBatchRespawn,
     takeDamage,
     addScore,
     clearGhostBullets,
@@ -183,7 +187,6 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
     ghosts,
     ghostGroupRef,
     handleGhostMount,
-    handleGhostUnmount,
     // 幽靈子彈
     ghostBullets,
     handleGhostBulletMount,
@@ -198,4 +201,4 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
     // 遊戲狀態
     isGameOver,
   };
-}
+};
