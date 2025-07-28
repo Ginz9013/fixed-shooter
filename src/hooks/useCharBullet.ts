@@ -84,8 +84,6 @@ export const useCharBullet = () => {
   const updateCharBullets = useCallback((
     deltaTime: number,
     ghostRefs: RefObject<Map<number, Sprite>>,
-    handleGhostBatchDefeat: (ids: Set<number>) => void,
-    addScore: (score: number) => void,
   ) => {
     const ghostsToRemove: Set<number> = new Set<number>();
     const bulletsToRemove: number[] = [];
@@ -125,14 +123,17 @@ export const useCharBullet = () => {
       };
     });
 
+    
     // 移除被擊中的幽靈
-    handleGhostBatchDefeat(ghostsToRemove);
-
+    // handleGhostBatchDefeat(ghostsToRemove);
+    
     // 根據移除的幽靈加分
-    addScore(ghostsToRemove.size);
-
+    // addScore(ghostsToRemove.size);
+    
     // 移除出界或擊中幽靈的子彈
     handleCharBulletBatchDelete(bulletsToRemove);
+
+    return ghostsToRemove;
   }, []);
 
 

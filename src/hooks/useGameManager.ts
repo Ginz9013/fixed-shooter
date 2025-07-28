@@ -40,7 +40,7 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
 
   // 遊戲結束
   const isGameOver = useMemo(() => hearts.length <= 0 || timing <= 0, [hearts, timing]);
-  const isGameCompleted = useMemo(() => ghosts.length <= 0, [ghosts]);
+  // const isGameCompleted = useMemo(() => ghosts.every(ghost => ghost.defeatedAt !== null), [ghosts]);
 
   // 加分方法
   const addScore = useCallback((score: number) => setScore(prev => prev + score), []);
@@ -102,16 +102,17 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
       };
 
       // 更新角色子彈
-      updateCharBullets(ticker.deltaTime, ghostRefs, handleGhostBatchDefeat, addScore);
+      const ghostToRemoveByBullets = updateCharBullets(ticker.deltaTime, ghostRefs);
 
       // 更新角色炸彈
-      updateCharBombs(
-        ticker.deltaTime,
-        characterSpec.special.type,
-        ghostRefs,
-        handleGhostBatchDefeat,
-        addScore,
-      );
+      const ghostToRemoveByBombs = updateCharBombs(ticker.deltaTime, characterSpec.special.type, ghostRefs);
+
+      const ghostToRemove = new Set<number>([...ghostToRemoveByBullets, ...ghostToRemoveByBombs]);
+      // 更新幽靈
+      handleGhostBatchDefeat(ghostToRemove);
+
+      // 更新分數
+      addScore(ghostToRemove.size);
 
       
       // 控制幽靈群組位置 & 上下漂浮
@@ -129,6 +130,14 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
 
       // 更新幽靈子彈位置
       updateGhostBullets(ticker.deltaTime, charRef.current, takeDamage);
+
+      // 幽靈重生
+      const now = Date.now();
+      const ghostToRespawn: Set<number> = new Set<number>();
+      ghosts.forEach(ghost => {
+        if (ghost.defeatedAt && now - ghost.defeatedAt > 5000) ghostToRespawn.add(ghost.id);
+      });
+      handleGhostBatchRespawn(ghostToRespawn);
     };
 
     app.ticker.add(gameLoop);
@@ -139,11 +148,9 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
   }, [
     app.ticker,
     characterSpec, // 將 characterSpec 加入依賴
-    charRef,
     moveDir,
     onCharFire,
     updateCharBullets,
-    ghostRefs,
     bobbing,
     onGhostFire,
     updateGhostBullets,
@@ -152,19 +159,18 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
     addScore,
     clearGhostBullets,
     clearCharBullets,
-    isGameCompleted,
     isGameOver,
     setTiming,
   ]);
 
   // 當遊戲結束時，清空子彈並停止遊戲
   useEffect(() => {
-    if (isGameOver || isGameCompleted) {
+    if (isGameOver) {
       clearGhostBullets();
       clearCharBullets();
       return;
     };
-  }, [isGameOver, isGameCompleted]);
+  }, [isGameOver]);
 
   return {
     // 愛心
@@ -191,6 +197,5 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
     handleCharBombMount,
     // 遊戲狀態
     isGameOver,
-    isGameCompleted,
   };
 }

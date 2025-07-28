@@ -55,7 +55,6 @@ const Game: React.FC<GameProps> = ({ character }) => {
     handleCharBombMount,
     // 遊戲狀態
     isGameOver,
-    isGameCompleted,
   } = useGameManager(character);
 
 
@@ -69,7 +68,7 @@ const Game: React.FC<GameProps> = ({ character }) => {
       </pixiContainer>
 
       {/* 分數 */}
-      {!isGameCompleted && !isGameOver && (
+      {!isGameOver && (
         <pixiText
           text={score}
           x={768 / 2 + 50}
@@ -84,7 +83,7 @@ const Game: React.FC<GameProps> = ({ character }) => {
       )}
 
       {/* 倒數計時 */}
-      {!isGameCompleted && !isGameOver && (
+      {!isGameOver && (
         <pixiText
           text={timing}
           x={768 - 70}
@@ -119,7 +118,7 @@ const Game: React.FC<GameProps> = ({ character }) => {
       </pixiContainer>
 
       {/* 幽靈子彈 */}
-      {!isGameCompleted && !isGameOver && ghostBullets.map((bullet) => (
+      {!isGameOver && ghostBullets.map((bullet) => (
         <GhostBullet
           key={bullet.id}
           id={bullet.id}
@@ -132,7 +131,7 @@ const Game: React.FC<GameProps> = ({ character }) => {
       {!isGameOver && <Character ref={charRef} charId={character.id} />}
 
       {/* 角色子彈 */}
-      {!isGameCompleted && !isGameOver && charBullets.map((bullet) => (
+      {!isGameOver && charBullets.map((bullet) => (
         <CharBullet
           id={bullet.id}
           key={bullet.id}
@@ -143,7 +142,7 @@ const Game: React.FC<GameProps> = ({ character }) => {
       ))}
 
       {/* 角色炸彈 */}
-      {!isGameCompleted && !isGameOver && charBombs.map((bomb) => (
+      {!isGameOver && charBombs.map((bomb) => (
         <CharBomb
           id={bomb.id}
           key={bomb.id}
@@ -154,9 +153,9 @@ const Game: React.FC<GameProps> = ({ character }) => {
         />
       ))}
 
-      {(isGameCompleted || isGameOver) && (
+      {isGameOver && (
         <pixiText
-          text={ isGameCompleted ? "You Win" : "Game Over"}
+          text="Game Over"
           x={768 / 2}
           y={window.innerHeight / 2}
           anchor={{ x: 0.5, y: 0.5 }}
