@@ -12,9 +12,10 @@ type GhostProps = {
   x: number;
   y: number;
   onMount: (id: number, ghost: Sprite) => void;
+  unMount: (id: number) => void;
 };
 
-const Ghost: React.FC<GhostProps> = ({ id, x, y, onMount }) => {
+const Ghost: React.FC<GhostProps> = ({ id, x, y, onMount, unMount }) => {
   // 貼圖
   const texture = Assets.get("/assets/マエデーズ15.png");
 
@@ -25,6 +26,8 @@ const Ghost: React.FC<GhostProps> = ({ id, x, y, onMount }) => {
   useEffect(() => {
     if (!ghostRef.current) return;
     onMount(id, ghostRef.current);
+
+    return () => unMount(id);
   }, []);
 
 

@@ -84,10 +84,10 @@ export const useCharBullet = () => {
   const updateCharBullets = useCallback((
     deltaTime: number,
     ghostRefs: RefObject<Map<number, Sprite>>,
-    handleGhostBatchDelete: (ids: number[]) => void,
+    handleGhostBatchDefeat: (ids: Set<number>) => void,
     addScore: (score: number) => void,
   ) => {
-    const ghostsToRemove: number[] = [];
+    const ghostsToRemove: Set<number> = new Set<number>();
     const bulletsToRemove: number[] = [];
 
     charBulletRefs.current.forEach((bullet, bulletId) => {
@@ -116,7 +116,7 @@ export const useCharBullet = () => {
           if (isCollision) {
             hitGhost = true;
             // 把幽靈推到待刪清單中
-            ghostsToRemove.push(ghostId);
+            ghostsToRemove.add(ghostId);
           }
         });
 
@@ -126,10 +126,10 @@ export const useCharBullet = () => {
     });
 
     // 移除被擊中的幽靈
-    handleGhostBatchDelete(ghostsToRemove);
+    handleGhostBatchDefeat(ghostsToRemove);
 
     // 根據移除的幽靈加分
-    addScore(ghostsToRemove.length);
+    addScore(ghostsToRemove.size);
 
     // 移除出界或擊中幽靈的子彈
     handleCharBulletBatchDelete(bulletsToRemove);

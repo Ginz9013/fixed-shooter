@@ -61,7 +61,7 @@ export const useCharBomb = () => {
     deltaTime: number,
     bombType: SpecialAbility["type"],
     ghostRefs: RefObject<Map<number, Sprite>>,
-    handleGhostBatchDelete: (ids: number[]) => void,
+    handleGhostBatchDelete: (ids: Set<number>) => void,
     addScore: (score: number) => void,
   ) => {
     const bombsToRemove: number[] = [];
@@ -95,7 +95,7 @@ export const useCharBomb = () => {
 
     // 如果發生爆炸，則清除爆炸範圍內的幽靈
     if (explosionCenter) {
-      const ghostsToDestroy: number[] = [];
+      const ghostsToDestroy: Set<number> = new Set<number>();
       const explosionRadius = bombType === "BIG_BOMB" ? CHAR_BIG_BOMB_SCOPE : CHAR_SMALL_BOMB_SCOPE; // 爆炸半徑
       const radiusSquared = explosionRadius * explosionRadius; // 使用半徑的平方來比較，避免開根號，效能較好
 
@@ -110,14 +110,14 @@ export const useCharBomb = () => {
         const distanceSquared = dx * dx + dy * dy;
 
         if (distanceSquared < radiusSquared) {
-          ghostsToDestroy.push(ghostId);
+          ghostsToDestroy.add(ghostId);
         }
       });
 
-      if (ghostsToDestroy.length > 0) {
+      if (ghostsToDestroy.size > 0) {
         handleGhostBatchDelete(ghostsToDestroy);
         // 加分 (例如每個幽靈 2 分)
-        addScore(ghostsToDestroy.length * 2);
+        addScore(ghostsToDestroy.size);
       }
     }
 

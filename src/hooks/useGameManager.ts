@@ -26,7 +26,7 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
   const { charBombs, handleCharBombMount, onCharFireBomb, updateCharBombs } = useCharBomb();
 
   // 幽靈群
-  const { ghosts, ghostRefs, handleGhostMount, handleGhostBatchDelete } = useGhost();
+  const { ghosts, ghostRefs, handleGhostMount, handleGhostUnmount, handleGhostBatchDefeat, handleGhostBatchRespawn } = useGhost();
   // 幽靈群組
   const { ghostGroupRef, bobbing } = useGhostGroupMovement();
   // 幽靈子彈狀態
@@ -102,14 +102,14 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
       };
 
       // 更新角色子彈
-      updateCharBullets(ticker.deltaTime, ghostRefs, handleGhostBatchDelete, addScore);
+      updateCharBullets(ticker.deltaTime, ghostRefs, handleGhostBatchDefeat, addScore);
 
       // 更新角色炸彈
       updateCharBombs(
         ticker.deltaTime,
         characterSpec.special.type,
         ghostRefs,
-        handleGhostBatchDelete,
+        handleGhostBatchDefeat,
         addScore,
       );
 
@@ -147,7 +147,7 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
     bobbing,
     onGhostFire,
     updateGhostBullets,
-    handleGhostBatchDelete,
+    handleGhostBatchDefeat,
     takeDamage,
     addScore,
     clearGhostBullets,
@@ -177,6 +177,7 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
     ghosts,
     ghostGroupRef,
     handleGhostMount,
+    handleGhostUnmount,
     // 幽靈子彈
     ghostBullets,
     handleGhostBulletMount,

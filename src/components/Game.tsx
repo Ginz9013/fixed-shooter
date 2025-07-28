@@ -41,6 +41,7 @@ const Game: React.FC<GameProps> = ({ character }) => {
     ghosts,
     ghostGroupRef,
     handleGhostMount,
+    handleGhostUnmount,
     // 幽靈子彈
     ghostBullets,
     handleGhostBulletMount,
@@ -103,14 +104,17 @@ const Game: React.FC<GameProps> = ({ character }) => {
         x={GHOST_GROUP_INIT_X}
         y={GHOST_GROUP_INIT_Y}
       >
-        {ghosts.map(ghost => (
-          <Ghost
-            key={ghost.id}
-            id={ghost.id}
-            x={ghost.x}
-            y={ghost.y}
-            onMount={handleGhostMount}
-          />
+        {ghosts
+          .filter(ghost => !ghost.defeatedAt)
+          .map(ghost => (
+            <Ghost
+              key={ghost.id}
+              id={ghost.id}
+              x={ghost.x}
+              y={ghost.y}
+              onMount={handleGhostMount}
+              unMount={handleGhostUnmount}
+            />
         ))}
       </pixiContainer>
 
