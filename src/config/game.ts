@@ -25,9 +25,11 @@ export const CHAR_BIG_BOMB_SCOPE = 200;
 // 幽靈
 export const GHOST_WIDTH = 50;
 export const GHOST_HEIGHT = 50;
+export const BOSS_GHOST_WIDTH = 120;
+export const BOSS_GHOST_HEIGHT = 110;
 
 // 幽靈群組
-export const GHOST_GROUP_INIT_X = (768 - 550) / 2;
+export const GHOST_GROUP_INIT_X = (768 - 400) / 2;
 export const GHOST_GROUP_INIT_Y = 100;
 
 // 幽靈子彈

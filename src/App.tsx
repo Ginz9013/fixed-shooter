@@ -8,6 +8,8 @@ import { CHARACTER_SPECS, type CharacterSpec } from "./config/characters";
 
 const assetList = [
   "/assets/background.png",
+  "/assets/マエデーズ12.png",
+  "/assets/マエデーズ13.png",
   "/assets/マエデーズ15.png",
   "/assets/レンジャー（レッド）.png",
   "/assets/レンジャー（イエロー）.png",

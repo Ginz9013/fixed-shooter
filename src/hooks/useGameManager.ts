@@ -131,7 +131,7 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
       const ghostToRespawn: Set<number> = new Set<number>();
 
       ghostRefs.current.forEach((ghost, id) => {
-        const defeatedAt = ghosts.current[id].defeatedAt;
+        const defeatedAt = ghosts.current.get(id)?.defeatedAt;
         if (!ghost.visible && defeatedAt && now - defeatedAt > 5000) ghostToRespawn.add(id);
       });
 

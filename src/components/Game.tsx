@@ -67,19 +67,17 @@ const Game: React.FC<GameProps> = ({ character }) => {
       </pixiContainer>
 
       {/* 分數 */}
-      {!isGameOver && (
-        <pixiText
-          text={score}
-          x={768 / 2 + 50}
-          y={50}
-          anchor={{ x: 0.5, y: 0.5 }}
-          style={{
-            fill: "white",
-            fontSize: 48,
-            fontWeight: "bold",
-          }}
-        />
-      )}
+      <pixiText
+        text={score}
+        x={768 / 2 + 50}
+        y={50}
+        anchor={{ x: 0.5, y: 0.5 }}
+        style={{
+          fill: "white",
+          fontSize: 48,
+          fontWeight: "bold",
+        }}
+      />
 
       {/* 倒數計時 */}
       {!isGameOver && (
@@ -102,10 +100,11 @@ const Game: React.FC<GameProps> = ({ character }) => {
         x={GHOST_GROUP_INIT_X}
         y={GHOST_GROUP_INIT_Y}
       >
-        {ghosts.current.map(ghost => (
+        {Array.from(ghosts.current.values()).map(ghost => (
           <Ghost
             key={ghost.id}
             id={ghost.id}
+            type={ghost.type}
             x={ghost.x}
             y={ghost.y}
             onMount={handleGhostMount}
