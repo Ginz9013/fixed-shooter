@@ -148,7 +148,7 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
 
       // 更新幽靈子彈位置
       const bulletSpeed = timing <= COUNTDOWN_TIMER
-        ? GHOST_BULLET_SPEED + 2
+        ? GHOST_BULLET_SPEED + 3
         : GHOST_BULLET_SPEED;
       updateGhostBullets(ticker.deltaTime, charRef.current, bulletSpeed, takeDamage);
 
