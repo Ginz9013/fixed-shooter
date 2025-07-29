@@ -17,6 +17,9 @@ import {
   NORMAL_GHOST_RESPAWN_MS,
   MIDDLE_GHOST_RESPAWN_MS,
   BOSS_GHOST_RESPAWN_MS,
+  BOSS_GHOST_SCORE,
+  MIDDLE_GHOST_SCORE,
+  NORMAL_GHOST_SCORE,
 } from "../config/game";
 import type { CharacterSpec } from "../config/characters";
 
@@ -121,7 +124,19 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
       handleGhostBatchDefeat(ghostToRemove);
 
       // 更新分數
-      addScore(ghostToRemove.size);
+      ghosts
+      const totalScore = Array.from(ghostToRemove).reduce((totalScore, ghostId) => {
+        const ghostType = ghosts.current.get(ghostId)?.type;
+        
+        const scoreOfType = ghostType === "boss"
+          ? BOSS_GHOST_SCORE
+          : ghostType === "middle"
+            ? MIDDLE_GHOST_SCORE
+            : NORMAL_GHOST_SCORE;
+        
+        return totalScore += scoreOfType;
+      }, 0);
+      addScore(totalScore);
 
       
       // 控制幽靈群組位置 & 上下漂浮
