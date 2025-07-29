@@ -142,8 +142,11 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
       bobbing(ticker.deltaTime);
 
       // 幽靈根據機率發射子彈
+      const probabilyty = timing <= COUNTDOWN_TIMER
+        ? SHOOTING_PROBABILITY * 3
+        : SHOOTING_PROBABILITY;
       ghostRefs.current.forEach(ghost => {
-        if (ghost.visible && Math.random() < SHOOTING_PROBABILITY && !isGameOver) onGhostFire(ghost);
+        if (ghost.visible && Math.random() < probabilyty && !isGameOver) onGhostFire(ghost);
       });
 
       // 更新幽靈子彈位置

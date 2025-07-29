@@ -2,7 +2,7 @@
 export const GAME_WIDTH = 768;
 
 // 時間
-export const COUNTDOWN_TIMER = 10; // 單位: 秒
+export const COUNTDOWN_TIMER = 15; // 單位: 秒
 
 // 角色
 export const CHARACTER_SIZE = 60;
