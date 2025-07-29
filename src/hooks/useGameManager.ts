@@ -74,7 +74,7 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
     const shootInterval = SHOOT_INTERVAL_MS * characterSpec.attackSpeedModifier;
     const shootTimer = setInterval(() => {
       // 將連射設定傳遞給 onCharFire
-      onCharFire(charRef, characterSpec.burstFire);
+      onCharFire(charRef, characterSpec.fire);
     }, shootInterval);
     
     return () => clearInterval(shootTimer);

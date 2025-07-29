@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState, type RefObject } from "react";
 import { checkCollision } from "../utils/game";
-import { CHARACTER_Y_POSITION, CHAR_BULLET_SPEED } from "../config/game";
+import { CHARACTER_Y_POSITION, CHAR_BULLET_SPEED, CHAR_BULLET_WIDTH } from "../config/game";
 import type { Sprite } from "pixi.js";
 import type { CharacterSpec } from "../config/characters";
 
@@ -45,39 +45,31 @@ export const useCharBullet = () => {
     charBulletRefs.current.clear();
   }, []);
 
-  // 角色開火 - 建立新子彈 (使用遞迴 setTimeout 解決閉包問題)
-  const onCharFire = useCallback((charRef: RefObject<Sprite | null>, burstFire: CharacterSpec['burstFire']) => {
-    const { count, delayMs } = burstFire;
+  // 角色開火 - 建立新子彈
+  const onCharFire = useCallback((charRef: RefObject<Sprite | null>, fire: CharacterSpec["fire"]) => {
+    if (!charRef.current) return;
 
-    // 定義一個遞迴函式來處理連射
-    const fireRecursive = (shotsLeft: number) => {
-      // 基本情況：如果沒有子彈要發射了，就停止
-      if (shotsLeft <= 0 || !charRef.current) {
-        return;
-      }
+    const positionCorrection = (fire.gap * (fire.amount - 1) + CHAR_BULLET_WIDTH) / 2;
+    const bullets: CharBulletData[] = [];
 
-      // --- 發射一枚子彈 ---
-      // 在這裡，我們讀取的是「現在」的角色位置
+    for (let i = 0; i < fire.amount; i++) {
+      // 子彈 x 軸相對位置
+      // 根據第幾顆子彈 (i) 增加位移
+      const originPosition = charRef.current.x + 25;
+      const offset = fire.gap * i;
+      const finalPosition = originPosition + offset - positionCorrection;
+
       const newBullet: CharBulletData = {
         id: nextBulletId.current++,
-        x: charRef.current.x + 10,
+        x: finalPosition,
         y: CHARACTER_Y_POSITION - 50,
         type: "normal",
       };
-      setCharBullets(prev => [...prev, newBullet]);
-      // --------------------
 
-      // 如果還有子彈需要連射，則設定下一次的發射
-      if (shotsLeft > 1) {
-        setTimeout(() => {
-          fireRecursive(shotsLeft - 1);
-        }, delayMs);
-      }
-    };
+      bullets.push(newBullet);
+    }
 
-    // 啟動連射
-    fireRecursive(count);
-
+    setCharBullets(prev => [...prev, ...bullets]);
   }, [setCharBullets]);
 
   // 更新子彈移動，判斷出界、擊中幽靈
