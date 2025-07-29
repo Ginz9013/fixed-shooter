@@ -126,7 +126,6 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
       handleGhostBatchDefeat(ghostToRemove);
 
       // 更新分數
-      ghosts
       const totalScore = Array.from(ghostToRemove).reduce((totalScore, ghostId) => {
         const ghostType = ghosts.current.get(ghostId)?.type;
         
