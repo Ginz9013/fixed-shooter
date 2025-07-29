@@ -27,6 +27,9 @@ export const GHOST_WIDTH = 50;
 export const GHOST_HEIGHT = 50;
 export const BOSS_GHOST_WIDTH = 120;
 export const BOSS_GHOST_HEIGHT = 110;
+export const NORMAL_GHOST_RESPAWN_MS = 3000;
+export const MIDDLE_GHOST_RESPAWN_MS = 4000;
+export const BOSS_GHOST_RESPAWN_MS = 6000;
 
 // 幽靈群組
 export const GHOST_GROUP_INIT_X = (768 - 400) / 2;

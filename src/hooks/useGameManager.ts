@@ -8,7 +8,16 @@ import { useCharBullet } from "./useCharBullet";
 import { useHearts } from "./useHearts";
 import { useGhostBullet } from "./useGhostBullet";
 import { useCharBomb } from "./useCharBomb";
-import { SHOOT_INTERVAL_MS, LEFT_BOUND, RIGHT_BOUND, MOVE_SPEED, SHOOTING_PROBABILITY } from "../config/game";
+import {
+  SHOOT_INTERVAL_MS,
+  LEFT_BOUND,
+  RIGHT_BOUND,
+  MOVE_SPEED,
+  SHOOTING_PROBABILITY,
+  NORMAL_GHOST_RESPAWN_MS,
+  MIDDLE_GHOST_RESPAWN_MS,
+  BOSS_GHOST_RESPAWN_MS,
+} from "../config/game";
 import type { CharacterSpec } from "../config/characters";
 
 
@@ -131,8 +140,18 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
       const ghostToRespawn: Set<number> = new Set<number>();
 
       ghostRefs.current.forEach((ghost, id) => {
-        const defeatedAt = ghosts.current.get(id)?.defeatedAt;
-        if (!ghost.visible && defeatedAt && now - defeatedAt > 5000) ghostToRespawn.add(id);
+        const ghostData = ghosts.current.get(id);
+        if (!ghostData) return;
+
+        const { type, defeatedAt } = ghostData;
+
+        const timeoutOfType = type === "boss"
+          ? BOSS_GHOST_RESPAWN_MS
+          : type === "middle"
+            ? MIDDLE_GHOST_RESPAWN_MS
+            : NORMAL_GHOST_RESPAWN_MS;
+
+        if (!ghost.visible && defeatedAt && now - defeatedAt > timeoutOfType) ghostToRespawn.add(id);
       });
 
       if (ghostToRespawn.size > 0) {
