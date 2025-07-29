@@ -1,6 +1,9 @@
 // 場景
 export const GAME_WIDTH = 768;
 
+// 時間
+export const COUNTDOWN_TIMER = 10000;
+
 // 角色
 export const CHARACTER_SIZE = 60;
 export const LEFT_BOUND = 0;

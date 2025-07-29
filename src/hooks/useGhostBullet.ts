@@ -53,14 +53,15 @@ export const useGhostBullet = () => {
   const updateGhostBullets = useCallback((
     deltaTime: number,
     character: Sprite,
-    takeDamage: () => void
+    speed: number,
+    takeDamage: () => void,
   ) => {
     const bulletsToRemove: number[] = [];
     let hitCharactor = false;
 
     ghostBulletRefs.current.forEach((bullet, bulletId) => {
       // 更新子彈位置
-      bullet.y += GHOST_BULLET_SPEED * deltaTime;
+      bullet.y += speed * deltaTime;
 
       // 檢查是否超出邊界 (y > screenHeight)
       if (bullet.y > window.innerHeight) {

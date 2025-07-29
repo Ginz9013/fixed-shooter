@@ -20,6 +20,8 @@ import {
   BOSS_GHOST_SCORE,
   MIDDLE_GHOST_SCORE,
   NORMAL_GHOST_SCORE,
+  GHOST_BULLET_SPEED,
+  COUNTDOWN_TIMER,
 } from "../config/game";
 import type { CharacterSpec } from "../config/characters";
 
@@ -148,7 +150,10 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
       });
 
       // 更新幽靈子彈位置
-      updateGhostBullets(ticker.deltaTime, charRef.current, takeDamage);
+      const bulletSpeed = timing <= COUNTDOWN_TIMER
+        ? GHOST_BULLET_SPEED + 2
+        : GHOST_BULLET_SPEED;
+      updateGhostBullets(ticker.deltaTime, charRef.current, bulletSpeed, takeDamage);
 
       // 幽靈重生
       const now = Date.now();
