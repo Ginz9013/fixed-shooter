@@ -14,9 +14,6 @@ import {
   RIGHT_BOUND,
   MOVE_SPEED,
   SHOOTING_PROBABILITY,
-  NORMAL_GHOST_RESPAWN_MS,
-  MIDDLE_GHOST_RESPAWN_MS,
-  BOSS_GHOST_RESPAWN_MS,
   BOSS_GHOST_SCORE,
   MIDDLE_GHOST_SCORE,
   NORMAL_GHOST_SCORE,
@@ -24,6 +21,7 @@ import {
   COUNTDOWN_TIMER,
 } from "../config/game";
 import type { CharacterSpec } from "../config/characters";
+import { ghostRespawn } from "../utils/game";
 
 
 export const useGameManager = (characterSpec: CharacterSpec) => {
@@ -121,8 +119,8 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
       // 更新角色炸彈
       const ghostToRemoveByBombs = updateCharBombs(ticker.deltaTime, characterSpec.special.type, ghostRefs);
 
-      const ghostToRemove = new Set<number>([...ghostToRemoveByBullets, ...ghostToRemoveByBombs]);
       // 更新幽靈
+      const ghostToRemove = new Set<number>([...ghostToRemoveByBullets, ...ghostToRemoveByBombs]);
       handleGhostBatchDefeat(ghostToRemove);
 
       // 更新分數
@@ -155,27 +153,7 @@ export const useGameManager = (characterSpec: CharacterSpec) => {
       updateGhostBullets(ticker.deltaTime, charRef.current, bulletSpeed, takeDamage);
 
       // 幽靈重生
-      const now = Date.now();
-      const ghostToRespawn: Set<number> = new Set<number>();
-
-      ghostRefs.current.forEach((ghost, id) => {
-        const ghostData = ghosts.current.get(id);
-        if (!ghostData) return;
-
-        const { type, defeatedAt } = ghostData;
-
-        const timeoutOfType = type === "boss"
-          ? BOSS_GHOST_RESPAWN_MS
-          : type === "middle"
-            ? MIDDLE_GHOST_RESPAWN_MS
-            : NORMAL_GHOST_RESPAWN_MS;
-
-        if (!ghost.visible && defeatedAt && now - defeatedAt > timeoutOfType) ghostToRespawn.add(id);
-      });
-
-      if (ghostToRespawn.size > 0) {
-        handleGhostBatchRespawn(ghostToRespawn);
-      }
+      ghostRespawn(ghostRefs, ghosts, handleGhostBatchRespawn);
     };
 
     app.ticker.add(gameLoop);
